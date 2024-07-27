@@ -1,48 +1,39 @@
 import os
 import subprocess
 import torch
-from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+from segment_anything import modeling, sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
 import cv2
 import supervision as sv
 from typing import Dict
-import numpy as np
-import matplotlib.pyplot as plt
 import random
+import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+from photo import Sample, Photo, Mask
 
-
-# source:
-# https://github.com/roboflow/notebooks/blob/main/notebooks/how-to-segment-anything-with-sam.ipynb
+CHECKPOINT_PATH = os.path.join(".", "weights", "sam_vit_h_4b8939.pth")
 
 # setup the environment
 # chmod +x ./setup.sh
-subprocess.check_output("./setup.sh", shell=True).decode("utf-8")
-HERE = "."
-# make sure the weights are downloaded
-CHECKPOINT_PATH = os.path.join(HERE, "weights", "sam_vit_h_4b8939.pth")
-print(CHECKPOINT_PATH, "; exist:", os.path.isfile(CHECKPOINT_PATH))
+def setup():
+    load_dotenv()
 
-# load the model
-DEVICE = torch.device("cpu") # or cuda/cpu if not mac
-MODEL_TYPE = "vit_h"
-sam = sam_model_registry[MODEL_TYPE](checkpoint=CHECKPOINT_PATH).to(device=DEVICE)
+    subprocess.check_output("./setup.sh", shell=True).decode("utf-8")
+    # make sure the weights are downloaded
+    print(CHECKPOINT_PATH, "; weights exist:", os.path.isfile(CHECKPOINT_PATH))
+    print("setup done")
 
 
-# mask generator
-mask_generator = SamAutomaticMaskGenerator(sam)
+def init_sam() -> modeling.Sam:
+    DEVICE = torch.device("cpu") # or cuda/cpu if not mac
+    MODEL_TYPE = "vit_h"
+    return sam_model_registry[MODEL_TYPE](checkpoint=CHECKPOINT_PATH).to(device=DEVICE)
 
-# load the image
 
-IMAGE_NAME = "5G.png"
-IMAGE_PATH = os.path.join(HERE, "data", IMAGE_NAME)
-
-# generate the mask
-image_bgr = cv2.imread(IMAGE_PATH)
-image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
-
-sam_result = mask_generator.generate(image_rgb)
+def init_mask_generator() -> SamAutomaticMaskGenerator:
+    sam = init_sam()
+    return SamAutomaticMaskGenerator(sam)
 
 # output the mask
-print(sam_result[0].keys())
 # mask_annotator = sv.MaskAnnotator(color_lookup=sv.ColorLookup.INDEX)
 # detections = sv.Detections.from_sam(sam_result=sam_result)
 # annotated_image = mask_annotator.annotate(scene=image_bgr.copy(), detections=detections)
@@ -54,53 +45,47 @@ print(sam_result[0].keys())
 #     titles=['source image', 'segmented image']
 # )
 
-height, width = image_bgr.shape[1:]
+def display_grid_of_all_polygons(ax, masks):
+    # display grid of all masks
+    for i in range(len(masks)):
+        ax.plot(*masks[i].polygon.exterior.xy, color=(masks[i].color[0] / 255, masks[i].color[1] / 255, masks[i].color[2] / 255))
 
-def is_touching_image_edge(mask: Dict[str, any], height: int, width: int) -> bool:
-    np_mask = mask['segmentation'].astype(np.uint8)
-    contours, _ = cv2.findContours(np_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    for contour in contours:
-        for point in contour:
-            x, y = point[0]
-            if x == 0 or x == width - 1 or y == 0 or y == height - 1:
-                return True
-    return False
+def display_grid_of_all(ax, img, masks):
+    for mask in masks:
+        contour = max(mask.contours, key = cv2.contourArea)
+        annotated = cv2.drawContours(image=img, contours=[contour], contourIdx=0, color=mask.color, thickness=3)
+    ax.imshow(annotated)
 
-# filter out masks that are touching the image edge
-filtered_results = [mask for mask in sam_result if not is_touching_image_edge(mask, height, width)]
+# polygons = [polygon_from_mask(mask) for mask in masks]
+# # for polygon in polygons:
+# plt.imshow(polygons[0], interpolation='nearest')
+# plt.show()
 
-print(len(sam_result), len(filtered_results))
-masks = [
-    mask['segmentation']
-    for mask
-    in sorted(filtered_results, key=lambda x: x['area'], reverse=True)
-]
+    # sv.plot_images_grid(
+    #     images=polygons,
+    #     grid_size=(8, int(len(polygons) / 8) + 1),
+    #     size=(16, 16)
+    # )
 
-def polygon_from_mask(mask: np.ndarray) -> cv2.typing.MatLike:
-    mask = mask.astype(np.uint8)
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contour = max(contours, key = cv2.contourArea)
-    epsilon = 0.025 * cv2.arcLength(contour, True)
-    aprox = cv2.approxPolyDP(contour, epsilon, True)
-    img = image_bgr
-    poly = cv2.drawContours(image=img, contours=[aprox], contourIdx=0, color=(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), thickness=3)
+def corners_number_dist(ax, polygons):
+    corners = [len(p.exterior.coords) for p in polygons]
+    ax.hist(corners, bins=range(2, 12, 1), label="corners number")
 
-    return poly
+def area_dist(ax, polygons):
+    areas = [p.area for p in polygons]
+    ax.hist(areas, bins=range(0, int(max(areas)), 100), label="area dist")
 
-polygons = [polygon_from_mask(mask) for mask in masks]
-# for polygon in polygons:
-plt.imshow(polygons[0], interpolation='nearest')
-plt.show()
+def main():
+    setup()
+    mask_generator = init_mask_generator()
+    sample = Sample("another.png", mask_generator)
+    polygons = [mask.polygon for mask in sample.masks]
+    fig, axs = plt.subplots(2, 2)
+    corners_number_dist(axs[0][0], polygons)
+    area_dist(axs[0][1], polygons)
 
-# shapely.plotting.plot_polygon(polygons[0])
+    display_grid_of_all_polygons(axs[1][0], sample.masks)
+    display_grid_of_all(axs[1][1], sample.photo, sample.masks)
+    plt.show()
 
-
-# display grid of all masks
-# sv.plot_images_grid(
-#     images=polygons,
-#     grid_size=(8, int(len(masks) / 8) + 1),
-#     size=(16, 16)
-# )
-
-
-print("done")
+main()
