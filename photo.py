@@ -8,8 +8,6 @@ import numpy as np
 import random
 import shapely
 
-
-
 class Mask:
     def __init__(self, _mask: Dict[str, any]):
         self.segmentation = _mask['segmentation']
@@ -24,7 +22,7 @@ class Mask:
         self.contours = ctrs
         self.color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         self.polygon = self._polygon_from_mask()
-        
+
     def _polygon_from_mask(self) -> cv2.typing.MatLike:
         contours = self.contours
         contour = max(contours, key = cv2.contourArea)
