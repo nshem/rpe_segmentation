@@ -33,7 +33,28 @@ class Mask:
         polygon = shapely.Polygon(p)
 
         return polygon
+
+    def average_angle_per_polygon(self) -> float:
+        coords = self.polygon.exterior.coords[1:]
+        return np.max(np.diff([calculate_angle(coords, i) for i in range(len(coords) - 1)]))
     
+def calculate_angle(coords, i):
+    num_points = len(coords)
+    
+    prev = (i - 1) % num_points
+    next = (i + 1) % num_points
+    
+    v1 = np.array(coords[prev]) - np.array(coords[i])
+    v2 = np.array(coords[next]) - np.array(coords[i])
+
+    dot_product = np.dot(v1, v2)
+    magnitude_v1 = np.linalg.norm(v1)
+    magnitude_v2 = np.linalg.norm(v2)
+    angle_radians = np.arccos(np.clip(dot_product / (magnitude_v1 * magnitude_v2), -1.0, 1.0))
+
+    angle_degrees = np.degrees(angle_radians)
+    return angle_degrees
+
 class Photo(np.ndarray):
     def __new__(self, _file_name: str):
         self.file_name = _file_name
@@ -59,7 +80,7 @@ class Photo(np.ndarray):
         return sorted_masks
 
     def is_touching_image_edge(self, mask) -> bool:
-        height, width = self.shape[1:]
+        height, width, _ = self.shape
         contours = mask.contours
         for contour in contours:
             for point in contour:
