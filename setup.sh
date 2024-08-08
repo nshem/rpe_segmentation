@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-pip3 install -q 'git+https://github.com/facebookresearch/segment-anything.git'
-pip3 install -q dataclasses-json supervision torchvision torch opencv-python shapely
+# pip3 install -q 'git+https://github.com/facebookresearch/segment-anything.git'
+# pip3 install -q dataclasses-json supervision torchvision torch opencv-python shapely python-dotenv
      
 HERE=$(pwd)
 

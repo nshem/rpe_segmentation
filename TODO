@@ -1,0 +1,24 @@
+# multiple images
+# multiple images analasys
+
+# distribution:
+# executable - test on diffrent os w/ docker
+
+# tabular output:
+# - postgres & class models
+# - export to file
+# - cache / data loader
+
+# multiple images:
+# - batch processing
+# - parallel ?
+
+# gui:
+# - samples table
+# - select image a show graphs
+# - file loader
+
+# backlog:
+# - model tuning
+# - docs & readme
+# - tests
