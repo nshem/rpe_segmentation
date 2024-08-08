@@ -1,16 +1,12 @@
 import os
 import subprocess
 import torch
-from segment_anything import modeling, sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+from segment_anything import modeling, sam_model_registry, SamAutomaticMaskGenerator
 import cv2
-import supervision as sv
-from typing import Dict
-import random
 import matplotlib.pyplot as plt
-from matplotlib import transforms
 import matplotlib.axes as Axes
 from dotenv import load_dotenv
-from photo import Sample, Photo, Mask
+from rpe_segmentation.models import Sample
 
 CHECKPOINT_PATH = os.path.join(".", "weights", "sam_vit_h_4b8939.pth")
 
