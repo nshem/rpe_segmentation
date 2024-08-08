@@ -46,8 +46,7 @@ def display_grid_of_all_polygons(ax: Axes, masks):
         ax.plot(x, y, linewidth=1, color=(masks[i].color[0] / 255, masks[i].color[1] / 255, masks[i].color[2] / 255))
         ax.yaxis.set_inverted(True)
         ax.set_aspect('equal')
-        # ax.fill(*masks[i].polygon.exterior.xy, color=(masks[i].color[0] / 255, masks[i].color[1] / 255, masks[i].color[2] / 255), alpha=0.5)
-        # ax.scatter(x, y, color=(masks[i].color[0] / 255, masks[i].color[1] / 255, masks[i].color[2] / 255))
+
 
 def display_grid_of_all(ax: Axes, img, masks):
     ax.set_title("segmentation")
