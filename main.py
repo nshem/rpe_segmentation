@@ -35,17 +35,6 @@ def init_mask_generator() -> SamAutomaticMaskGenerator:
     sam = init_sam()
     return SamAutomaticMaskGenerator(sam)
 
-# output the mask
-# mask_annotator = sv.MaskAnnotator(color_lookup=sv.ColorLookup.INDEX)
-# detections = sv.Detections.from_sam(sam_result=sam_result)
-# annotated_image = mask_annotator.annotate(scene=image_bgr.copy(), detections=detections)
-
-# display the results on the image
-# sv.plot_images_grid(
-#     images=[image_bgr, annotated_image],
-#     grid_size=(1, 2),
-#     titles=['source image', 'segmented image']
-# )
 
 def display_grid_of_all_polygons(ax: Axes, masks):
     ax.axis('off')
@@ -68,17 +57,6 @@ def display_grid_of_all(ax: Axes, img, masks):
         annotated = cv2.drawContours(image=img, contours=[contour], contourIdx=0, color=mask.color, thickness=2)
     ax.imshow(annotated)
 
-# polygons = [polygon_from_mask(mask) for mask in masks]
-# # for polygon in polygons:
-# plt.imshow(polygons[0], interpolation='nearest')
-# plt.show()
-
-    # sv.plot_images_grid(
-    #     images=polygons,
-    #     grid_size=(8, int(len(polygons) / 8) + 1),
-    #     size=(16, 16)
-    # )
-
 def corners_number_dist(ax, polygons):
     corners = [len(p.exterior.coords) - 1 for p in polygons]
     ax.hist(corners, bins=range(2, 12, 1), label="corners number")
@@ -88,7 +66,6 @@ def area_dist(ax, polygons):
     areas = [p.area for p in polygons]
     ax.hist(areas, bins=range(0, int(max(areas)), 100), label="area dist")
     ax.set_title("area dist")
-
 
 def average_angle_dist(ax, masks):
     angles = [m.average_angle_per_polygon() for m in masks]
@@ -109,7 +86,7 @@ def main():
 
     axs['H'].axis('off')
     axs["H"].text(0, 0, f"polygons: {len(polygons)}")
-    
+
     plt.show()
 
 main()
