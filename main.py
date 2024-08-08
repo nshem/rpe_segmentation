@@ -98,7 +98,7 @@ def average_angle_dist(ax, masks):
 def main():
     setup()
     mask_generator = init_mask_generator()
-    sample = Sample("another.png", mask_generator)
+    sample = Sample(f"1.png", mask_generator)
     polygons = [mask.polygon for mask in sample.masks]
     fig, axs = plt.subplot_mosaic([['A', 'A', 'B', 'B'],['A', 'A', 'B', 'B'], ['C', 'D', 'E', 'H']])
     display_grid_of_all_polygons(axs['A'], sample.masks)
