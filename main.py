@@ -6,7 +6,8 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.axes as Axes
 from dotenv import load_dotenv
-from rpe_segmentation.models import Sample
+from models import Sample
+import datetime
 
 CHECKPOINT_PATH = os.path.join(".", "weights", "sam_vit_h_4b8939.pth")
 
@@ -68,7 +69,7 @@ def average_angle_dist(ax, masks):
     ax.set_title("largest angle diff dist")
 
 def main():
-    setup()
+    # setup()
     mask_generator = init_mask_generator()
     sample = Sample(f"1.png", mask_generator)
     polygons = [mask.polygon for mask in sample.masks]

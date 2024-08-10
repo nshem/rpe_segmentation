@@ -5,6 +5,8 @@
      
 HERE=$(pwd)
 
+pip3 install -r requirements.txt
+
 # Download the weights
 if [ ! -d ${HERE}/weights ]; then
     echo "Downloading the weights"
