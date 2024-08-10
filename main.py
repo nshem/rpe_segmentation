@@ -27,11 +27,9 @@ def init_sam() -> modeling.Sam:
     MODEL_TYPE = "vit_h"
     return sam_model_registry[MODEL_TYPE](checkpoint=CHECKPOINT_PATH).to(device=DEVICE)
 
-
 def init_mask_generator() -> SamAutomaticMaskGenerator:
     sam = init_sam()
     return SamAutomaticMaskGenerator(sam)
-
 
 def display_grid_of_all_polygons(ax: Axes, masks):
     ax.axis('off')
