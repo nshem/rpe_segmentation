@@ -1,3 +1,6 @@
+# from src.modules.data_processing import process_data
+# from src.gui.gui import start_gui
+
 import os
 import subprocess
 import torch
@@ -6,8 +9,7 @@ import cv2
 import matplotlib.pyplot as plt
 import matplotlib.axes as Axes
 from dotenv import load_dotenv
-from models import Sample
-import datetime
+from src.modules.sample import Sample
 
 CHECKPOINT_PATH = os.path.join(".", "weights", "sam_vit_h_4b8939.pth")
 
@@ -83,4 +85,10 @@ def main():
 
     plt.show()
 
-main()
+
+if __name__ == "__main__":
+    main()
+
+    # Kick off the main functionality of the application
+    # data = process_data()
+    # start_gui(data)
