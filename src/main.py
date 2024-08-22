@@ -6,10 +6,17 @@ import subprocess
 import torch
 from segment_anything import modeling, sam_model_registry, SamAutomaticMaskGenerator
 import cv2
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("WebAgg")
+import tempfile
+import webbrowser
+
+import matplotlib.pyplot as plt, mpld3
 import matplotlib.axes as Axes
 from dotenv import load_dotenv
 from src.modules.sample import Sample
+import sys
+
 
 CHECKPOINT_PATH = os.path.join(".", "weights", "sam_vit_h_4b8939.pth")
 
@@ -27,6 +34,7 @@ def setup():
 def init_sam() -> modeling.Sam:
     DEVICE = torch.device("cpu") # or cuda/cpu if not mac
     MODEL_TYPE = "vit_h"
+    print(CHECKPOINT_PATH, "; weights exist:", os.path.isfile(CHECKPOINT_PATH))
     return sam_model_registry[MODEL_TYPE](checkpoint=CHECKPOINT_PATH).to(device=DEVICE)
 
 def init_mask_generator() -> SamAutomaticMaskGenerator:
@@ -70,9 +78,11 @@ def average_angle_dist(ax, masks):
 
 def main():
     # setup()
+
     mask_generator = init_mask_generator()
     sample = Sample(f"1.png", mask_generator)
     polygons = [mask.polygon for mask in sample.masks]
+    print(f"setup done: {len(polygons)} polygons")
     fig, axs = plt.subplot_mosaic([['A', 'A', 'B', 'B'],['A', 'A', 'B', 'B'], ['C', 'D', 'E', 'H']])
     display_grid_of_all_polygons(axs['A'], sample.masks)
     display_grid_of_all(axs['B'], sample.photo, sample.masks)
@@ -83,12 +93,24 @@ def main():
     axs['H'].axis('off')
     axs["H"].text(0, 0, f"polygons: {len(polygons)}")
 
-    plt.show()
-
+    # plt.show()
+    
+    template = mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False, template_type='general', figid=None, use_http=False)
+    with tempfile.NamedTemporaryFile('w', delete=False, suffix='.html') as f:
+        url = 'file://' + f.name
+        f.write(template)
+    webbrowser.open(url)
 
 if __name__ == "__main__":
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        print('running in a PyInstaller bundle')
+    else:
+        print('running in a normal Python process')
+
     main()
 
     # Kick off the main functionality of the application
     # data = process_data()
     # start_gui(data)
+
+    # pyinstaller --noconfirm main.spec | ./dist/main/main

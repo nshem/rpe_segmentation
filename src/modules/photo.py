@@ -17,6 +17,8 @@ class Photo(np.ndarray):
 
     def _load_image(self, image_name: str) -> np.ndarray:
         image_path = os.path.join(".", "data", image_name)
+        if not os.path.isfile(image_path):
+            raise FileNotFoundError(f"File {image_path} not found")
         img = cv2.imread(image_path)
         img = self._preprocess_image(self, img)
         return img
