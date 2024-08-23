@@ -1,36 +1,12 @@
-import os
-import subprocess
-import torch
-from segment_anything import modeling, sam_model_registry, SamAutomaticMaskGenerator
+
+
 import cv2
-import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use("WebAgg")
+
+import matplotlib.pyplot as plt, mpld3
 import matplotlib.axes as Axes
-from dotenv import load_dotenv
-from rpe_segmentation.models import Sample
-
-CHECKPOINT_PATH = os.path.join(".", "weights", "sam_vit_h_4b8939.pth")
-
-# setup the environment
-# chmod +x ./setup.sh
-def setup():
-    load_dotenv()
-
-    subprocess.check_output("./setup.sh", shell=True).decode("utf-8")
-    # make sure the weights are downloaded
-    print(CHECKPOINT_PATH, "; weights exist:", os.path.isfile(CHECKPOINT_PATH))
-    print("setup done")
-
-
-def init_sam() -> modeling.Sam:
-    DEVICE = torch.device("cpu") # or cuda/cpu if not mac
-    MODEL_TYPE = "vit_h"
-    return sam_model_registry[MODEL_TYPE](checkpoint=CHECKPOINT_PATH).to(device=DEVICE)
-
-
-def init_mask_generator() -> SamAutomaticMaskGenerator:
-    sam = init_sam()
-    return SamAutomaticMaskGenerator(sam)
-
+from src.modules.sample import Sample
 
 def display_grid_of_all_polygons(ax: Axes, masks):
     ax.axis('off')
@@ -67,21 +43,19 @@ def average_angle_dist(ax, masks):
     ax.hist(angles, bins=range(0, 180, 10), label="angle dist")
     ax.set_title("largest angle diff dist")
 
-def main():
-    setup()
-    mask_generator = init_mask_generator()
-    sample = Sample(f"1.png", mask_generator)
+
+def plot_sample(sample: Sample) -> str:
     polygons = [mask.polygon for mask in sample.masks]
+
     fig, axs = plt.subplot_mosaic([['A', 'A', 'B', 'B'],['A', 'A', 'B', 'B'], ['C', 'D', 'E', 'H']])
     display_grid_of_all_polygons(axs['A'], sample.masks)
     display_grid_of_all(axs['B'], sample.photo, sample.masks)
     corners_number_dist(axs['C'], polygons)
     area_dist(axs['D'], polygons)
     average_angle_dist(axs["E"], sample.masks)
-
     axs['H'].axis('off')
     axs["H"].text(0, 0, f"polygons: {len(polygons)}")
 
-    plt.show()
+    # plt.show()
 
-main()
+    return mpld3.fig_to_html(fig, d3_url=None, mpld3_url=None, no_extras=False, template_type='general', figid=None, use_http=False)

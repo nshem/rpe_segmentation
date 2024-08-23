@@ -1,3 +1,5 @@
 venv
 weights/*
 .DS_STORE
+build
+dist
