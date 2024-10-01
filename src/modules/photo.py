@@ -8,6 +8,8 @@ import numpy as np
 from src.modules.mask import Mask
 import src.modules.mask as mask_module
 import src.modules.utils as utils
+import base64
+import logging
 
 class Photo(np.ndarray):
     def __new__(self, _file_name: str):
@@ -16,9 +18,10 @@ class Photo(np.ndarray):
         return super().__new__(self, shape=img.shape, dtype=img.dtype, strides=img.strides, buffer=img)
 
     def _load_image(self, image_name: str) -> np.ndarray:
-        image_path = os.path.join(".", "data", image_name)
+        samples_path = os.getenv("SAMPLES_PATH", "data")
+        image_path = os.path.join(".", samples_path, image_name)
         if not os.path.isfile(image_path):
-            raise FileNotFoundError(f"File {image_path} not found")
+            FileNotFoundError(f"File {image_path} not found")
         img = cv2.imread(image_path)
         img = self._preprocess_image(self, img)
         return img
@@ -44,6 +47,10 @@ class Photo(np.ndarray):
                 if x == 0 or x == width - 1 or y == 0 or y == height - 1:
                     return True
         return False
+    
+    def to_png_bytes(self) -> bytes:
+        _, buffer = cv2.imencode('.png', self)
+        return base64.b64encode(buffer).decode('utf-8')
     
 
 
