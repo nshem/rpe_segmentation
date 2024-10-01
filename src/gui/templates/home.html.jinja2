@@ -4,13 +4,11 @@
 {% block title %}Home Page{% endblock %}
 
 {% block content %}
-
+{% from "components/samples_table.html.jinja2" import samples_table %}
 <div id="home-page">
-    <h1>Welcome to the Home Page</h1>
+    <h2>Welcome to the Home Page</h2>
     <p>This is the home page of the application.</p>
-    {% with image_data=image_data %}
-        {% include "components/samples_table.html.jinja2" %}
-    {% endwith %}
+        {{ samples_table(image_data) }}
     <form method="POST" action="/upload" enctype="multipart/form-data">
         <input type="file" name="file">
         <input type="submit" value="Upload">
