@@ -8,9 +8,9 @@
 <div id="home-page">
     <h1>Welcome to the Home Page</h1>
     <p>This is the home page of the application.</p>
-    {% for image in image_data %}
-    <img src="data:image/png;base64, {{ image }}" alt="Home Page Image" style="height:70px;width:70px">
-    {% endfor %}
+    {% with image_data=image_data %}
+        {% include "components/samples_table.html.jinja2" %}
+    {% endwith %}
     <form method="POST" action="/upload" enctype="multipart/form-data">
         <input type="file" name="file">
         <input type="submit" value="Upload">

@@ -41,4 +41,4 @@ def upload_file():
 
 def app_run():
     debug = os.getenv("DEBUG", "True") == "True"
-    app.run(debug=debug)
+    app.run(debug=debug, port=5005)

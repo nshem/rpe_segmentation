@@ -1,0 +1,10 @@
+<div id="samples-table">
+    <table>
+    {% for image in image_data %}
+    <tr>
+        <td><img src="data:image/png;base64, {{ image }}" alt="Home Page Image" style="height:70px;width:70px"></td>
+        <td><button>Analyze</button></td>
+    </tr>
+    {% endfor %}
+    </table>
+</div>
