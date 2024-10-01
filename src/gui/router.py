@@ -36,7 +36,8 @@ def upload_file():
     if file:
         logging.warning(f"Uploading file {file.filename}")
         file.save(os.path.join(os.getenv("SAMPLES_PATH", ""), file.filename))
-        return f"File {file.filename} uploaded successfully"
+        logging.info(f"File {file.filename} uploaded successfully")
+        return app.redirect("/")
 
 def app_run():
     debug = os.getenv("DEBUG", "True") == "True"
