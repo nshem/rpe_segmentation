@@ -6,10 +6,8 @@ opencv_python_headless==4.10.0.84
 python-dotenv==1.0.1
 segment_anything==1.0
 Shapely==2.0.5
-torch==2.3.1
-python-fasthtml==1.0.0
 torch==2.4.1
 torchvision==0.19.1
 mpld3==0.5.10
-flask==3.0.3
 tornado==6.4.1
+python-fasthtml==1.0.5
