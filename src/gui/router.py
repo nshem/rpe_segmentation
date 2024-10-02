@@ -19,7 +19,7 @@ def index():
 
             with open(os.path.join(os.getenv("SAMPLES_PATH", ""), file), "rb") as f:
                 img = base64.b64encode(f.read()).decode('utf-8')
-                image_data.append(img)
+                image_data.append({"b64": img, "name": file})
     except Exception as e:
         logging.error(e)
     return home.render(upload_callback=upload_callback, image_data=image_data)

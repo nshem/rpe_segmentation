@@ -3,13 +3,15 @@
     <table>
         <thead>
           <tr>
-              <th>Sample</th>
-              <th>Analyze</th>
+            <th>Sample</th>
+            <th>Name</th>
+            <th>Analyze</th>
           </tr>
         </thead>
         {% for image in image_data %}
         <tr>
-            <td><img src="data:image/png;base64, {{ image }}" alt="Home Page Image" style="height:70px;width:70px"></td>
+            <td><img src="data:image/png;base64, {{ image.b64 }}" alt="Home Page Image" style="height:70px;width:70px"></td>
+            <td>{{ image.name }}</td>            
             <td><button>Analyze</button></td>
         </tr>
         {% endfor %}
