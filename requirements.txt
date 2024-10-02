@@ -12,3 +12,4 @@ torch==2.4.1
 torchvision==0.19.1
 mpld3==0.5.10
 flask==3.0.3
+tornado==6.4.1

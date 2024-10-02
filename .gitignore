@@ -4,5 +4,5 @@ weights/*
 build
 dist
 input/*
-
+.sesskey
 __pycache__
