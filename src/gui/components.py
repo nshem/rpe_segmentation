@@ -77,7 +77,7 @@ def Home(context={}) -> str:
             ImagesTable()
         ),
         Br(),
-        H3("Upload an image"),
+        H3("Upload samples"),
         ImagesForm(context.get("message", "")),
         id=HOME_ID
     )
