@@ -6,24 +6,23 @@ import src.gui.plots.display as display
 import src.modules.sam as sam
 
 from fasthtml.common import *
-import src.gui.home as home
+import src.gui.components as components
 
 css = Style(href="./static/css/materialize.css", type="text/css")
 gridlink = Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css", type="text/css")
 htmx_ws = Script(src="https://unpkg.com/htmx-ext-ws@2.0.0/ws.js")
 picolink = Link(rel="stylesheet", href="https://unpkg.com/pico.css/dist/pico.min.css", type="text/css")
 
-generator = sam.init_mask_generator()
-
 logging.info("Serving GUI")
 debug = os.getenv("DEBUG", "True") == "True"
-app,rt = fast_app(debug=debug, hdrs=(picolink, gridlink, css, htmx_ws), log_level="info")
+app,rt = fast_app(debug=debug, hdrs=(picolink, gridlink, css, htmx_ws), log_level="info", static_path="./gui")
 
 context = {}
+generator = sam.init_mask_generator()
 
 @rt('/')
 def get():
-    return home.Home()
+    return components.Home()
 
 @rt("/upload")
 async def upload_image(request: Request):
@@ -37,11 +36,11 @@ async def upload_image(request: Request):
                 fos.write(contents)
             
             filenames.append(image.filename)
-        context.update("message","Files uploaded successfully: " + ", ".join(filenames))
+        context["message"] = "Files uploaded successfully: " + ", ".join(filenames)
     except Exception as e:
         logging.error(e)
-        context.update("message","Error uploading files")
-    return home.Home(context)
+        context["message"] = "Error uploading files" + str(e)
+    return components.Home(context)
 
 @rt("/{image_name}")
 def delete(image_name: str):
@@ -49,7 +48,7 @@ def delete(image_name: str):
         os.remove(os.path.join(os.getenv("SAMPLES_PATH", ""), image_name + ".png"))
     except Exception as e:
         logging.error(e)
-    return home.ImagesTable()
+    return components.ImagesTable()
 
 @rt("/analyze/{image_name}")
 def get(image_name: str):
@@ -63,7 +62,3 @@ def get(image_name: str):
         logging.error(e)
     print("Done Analyzing image: " + image_name)
     return P("Error analyzing image: " + image_name)
-
-if __name__ == '__main__':
-    os.environ["SAMPLES_PATH"] = "./input"
-    serve()
