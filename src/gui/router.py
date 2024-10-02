@@ -8,7 +8,7 @@ import src.modules.sam as sam
 from fasthtml.common import *
 import src.gui.components as components
 
-spacing = Link(rel="stylesheet", href="./css/spacing.css", type="text/css")
+spacing = Link(rel="stylesheet", href="./css/spacing.min.css", type="text/css")
 gridlink = Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css", type="text/css")
 htmx_ws = Script(src="https://unpkg.com/htmx-ext-ws@2.0.0/ws.js")
 picolink = Link(rel="stylesheet", href="https://unpkg.com/pico.css/dist/pico.min.css", type="text/css")
