@@ -8,14 +8,14 @@ import src.modules.sam as sam
 from fasthtml.common import *
 import src.gui.components as components
 
-css = Style(href="./static/css/materialize.css", type="text/css")
+spacing = Link(rel="stylesheet", href="./css/spacing.css", type="text/css")
 gridlink = Link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css", type="text/css")
 htmx_ws = Script(src="https://unpkg.com/htmx-ext-ws@2.0.0/ws.js")
 picolink = Link(rel="stylesheet", href="https://unpkg.com/pico.css/dist/pico.min.css", type="text/css")
-
+favicon = Link(rel="icon", type="image/x-icon", href="./favicon.ico")
 logging.info("Serving GUI")
 debug = os.getenv("DEBUG", "True") == "True"
-app,rt = fast_app(debug=debug, hdrs=(picolink, gridlink, css, htmx_ws), log_level="info", static_path="./gui")
+app,rt = fast_app(debug=debug, hdrs=(spacing, picolink, gridlink, htmx_ws, favicon), log_level="info", static_path="./src/gui/static")
 
 context = {}
 generator = sam.init_mask_generator()

@@ -4,20 +4,23 @@ import src.gui.utils as utils
 HOME_ID = "home"
 
 def ImageActions(image_name: str):
-    return [
+    return Group(
         Button(
             "Analyse",
             hx_get=f"/analyze/{image_name}",
             hx_target="#plot",
+            cls="primary pa-1",
         ),
         Button(
             "Delete",
+            cls="secondary pa-1",
             hx_delete=f"/{image_name}",
             hx_confirm="Are you sure you want to delete this image?",
             hx_target="#images-table",
-            hx_swap="outerHTML"
-        )
-    ]
+            hx_swap="outerHTML",
+        ),
+        cls="ma-1"
+    )
 
 def ImagesTable() -> Table:
     images: list[utils.ImageData] = utils.load_images()
@@ -31,7 +34,8 @@ def ImagesTable() -> Table:
                 ),
                 Td(image.name),
                 Td(
-                   *ImageActions(image_name=image.name)
+                   ImageActions(image_name=image.name),
+                   width="200px",
                 )
             )
         )
@@ -68,12 +72,12 @@ def Home(context={}) -> str:
         H1("RPE Segmentation"),
         Br(),
         Div(id="plot"),
-        H2("Images"),
+        H2("Samples"),
         Div(
             ImagesTable()
         ),
         Br(),
-        H2("Upload an image"),
+        H3("Upload an image"),
         ImagesForm(context.get("message", "")),
         id=HOME_ID
     )
