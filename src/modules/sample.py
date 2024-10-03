@@ -1,16 +1,11 @@
-import cv2, os
-import numpy as np
-import os
-from segment_anything import SamAutomaticMaskGenerator
-import cv2
-from typing import Dict
-import numpy as np
 from src.modules.photo import Photo
+from src.modules.sam import generator
+
 
 class Sample:
-    def __init__(self, _file_name: str, mask_generator: SamAutomaticMaskGenerator):
+    def __init__(self, _file_name: str):
         self.photo = Photo(_file_name)
-        self.masks = self.photo.generate_masks(mask_generator)
+        self.masks = self.photo.generate_masks(generator)
 
 
 def load_sample_return_image(sample: Sample) -> str:
