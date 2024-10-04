@@ -111,7 +111,7 @@ def Br() -> str:
 
 def Content(context: dict) -> str:
     return lib.Div(
-        lib.H1("RPE Segmentation"),
+        lib.H1("👁️ RPE Segmentation"),
         lib.Div(id="plot"),
         Br(),
         lib.Div(ImagesTable()),
