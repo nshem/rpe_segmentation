@@ -3,3 +3,6 @@ weights/*
 .DS_STORE
 build
 dist
+input/*
+.sesskey
+__pycache__

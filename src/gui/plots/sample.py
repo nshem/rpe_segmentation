@@ -2,6 +2,7 @@
 
 import cv2
 import matplotlib
+import tornado # required for WebEgg
 matplotlib.use("WebAgg")
 
 import matplotlib.pyplot as plt, mpld3
