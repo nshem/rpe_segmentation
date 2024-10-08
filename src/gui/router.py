@@ -3,6 +3,7 @@ import logging
 from fasthtml.common import *
 
 from src.modules import sample
+from src.modules.photo import Photo
 from src.gui import components, plots
 from src.gui.headers import headers
 
@@ -30,11 +31,7 @@ async def upload_image(request: Request):
         images = form.getlist("images")
         for image in images:
             contents = await image.read()
-            with open(
-                os.path.join(os.getenv("SAMPLES_PATH", ""), image.filename), "wb"
-            ) as fos:
-                fos.write(contents)
-
+            Photo.create_new(_filename=image.filename, _bytes=contents)
             filenames.append(image.filename)
         context["success"] = True
         context["upload_message"] = "Files uploaded successfully: " + ", ".join(
@@ -47,26 +44,25 @@ async def upload_image(request: Request):
     return components.Content(context)
 
 
-@rt("/{image_name}")
-def delete(image_name: str):
+@rt("/{id}")
+def delete(id: int):
     try:
-        os.remove(os.path.join(os.getenv("SAMPLES_PATH", ""), image_name + ".png"))
+        Photo(id).delete()
     except Exception as e:
         logging.error(e)
     return components.ImagesTable()
 
 
-@rt("/analyze/{image_name}")
-def get(image_name: str):
+@rt("/analyze/{id}")
+def get(id: int):
     try:
-        print("Analyzing image: " + image_name)
-        s = sample.Sample(image_name + ".png")
-        print("Displaying image: " + image_name)
+        s = sample.Sample(id=id)
+        s.generate_masks()
         plots.display(s)
         return components.Success(
-            "Done Analyzing image: " + image_name + " - Displaying plotly in a new tab"
+            f"Done Analyzing image: {id} - Displaying plotly in a new tab"
         )
     except Exception as e:
         logging.error(e)
-    print("Done Analyzing image: " + image_name)
-    return components.Error("Error analyzing image: " + image_name)
+    print(f"Done Analyzing image: {id}")
+    return components.Error(f"Error analyzing image: {id}")

@@ -9,30 +9,50 @@ from src.modules.mask import Mask
 import src.modules.mask as mask_module
 import src.modules.utils as utils
 import base64
-import logging
+from src.modules.storage import storage
+
 
 class Photo(np.ndarray):
-    def __new__(self, _file_name: str):
-        self.file_name = _file_name
-        img = self._load_image(self, _file_name)        
-        return super().__new__(self, shape=img.shape, dtype=img.dtype, strides=img.strides, buffer=img)
+    id: int
+    filename: str
 
-    def _load_image(self, image_name: str) -> np.ndarray:
-        samples_path = os.getenv("SAMPLES_PATH", "data")
-        image_path = os.path.join(".", samples_path, image_name)
-        if not os.path.isfile(image_path):
-            FileNotFoundError(f"File {image_path} not found")
-        img = cv2.imread(image_path)
-        img = self._preprocess_image(self, img)
-        return img
-    
-    def _preprocess_image(self, image: np.ndarray) -> np.ndarray:
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        return image
-    
+    def __new__(self, id: int):
+        photo = storage.Photo.get_by_id(id)
+        if not photo:
+            raise FileNotFoundError(f"Photo with id {id} not found")
+        print(f"Photo({photo.id}) loaded from db")
+
+        self.id = id
+        self.filename = photo.filename
+
+        _bytes = base64.b64decode(photo.nparray)
+        img = np.frombuffer(_bytes, dtype=np.uint8)
+        img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+
+        return super().__new__(
+            self, shape=img.shape, dtype=img.dtype, strides=img.strides, buffer=img
+        )
+
+    @classmethod
+    def create_new(cls, _filename: str, _bytes: bytes):
+        try:
+            storage_obj = (
+                storage.Photo.select().where(storage.Photo.filename == _filename).get()
+            )
+        except storage.Photo.DoesNotExist:
+            storage_obj = storage.Photo.create(
+                filename=_filename, nparray=base64.b64encode(_bytes).decode("utf-8")
+            )
+
+        return Photo(storage_obj.id)
+
+    def delete(self):
+        print(f"deleting photo with id {self.id}")
+        return storage.Photo.delete_by_id(self.id)
+
     def generate_masks(self, mask_generator: SamAutomaticMaskGenerator):
         sam_results = mask_generator.generate(self)
-        masks = [ Mask(mask) for mask in sam_results ]
+        masks = [Mask(mask) for mask in sam_results]
         filtered_results = filter_masks(masks, self)
         sorted_masks = mask_module.sort_masks(filtered_results)
 
@@ -47,18 +67,17 @@ class Photo(np.ndarray):
                 if x == 0 or x == width - 1 or y == 0 or y == height - 1:
                     return True
         return False
-    
+
     def to_png_bytes(self) -> bytes:
-        _, buffer = cv2.imencode('.png', self)
-        return base64.b64encode(buffer).decode('utf-8')
-    
+        _, buffer = cv2.imencode(".png", self)
+        return base64.b64encode(buffer).decode("utf-8")
 
 
 def filter_masks(masks: list[Mask], original_image: Photo) -> list[Mask]:
-    areas_mean = np.mean([ mask.area for mask in masks ])
+    areas_mean = np.mean([mask.area for mask in masks])
     return [
         mask
-        for mask
-        in masks
-        if not original_image.is_touching_image_edge(mask) and not utils.smaller_then_third_mean(mask.area, areas_mean)
+        for mask in masks
+        if not original_image.is_touching_image_edge(mask)
+        and not utils.smaller_then_third_mean(mask.area, areas_mean)
     ]

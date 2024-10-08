@@ -3,8 +3,12 @@ from src.modules.sam import generator
 
 
 class Sample:
-    def __init__(self, _file_name: str):
-        self.photo = Photo(_file_name)
+
+    def __init__(self, id: int):
+        self.photo = Photo(id)
+        self.masks = []
+
+    def generate_masks(self):
         self.masks = self.photo.generate_masks(generator)
 
 

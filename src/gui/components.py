@@ -23,20 +23,20 @@ def Loader() -> str:
     return lib.H4(cls=f"loader mx-1", id="loader")
 
 
-def ImageActions(image_name: str):
+def ImageActions(id: int):
     return lib.Div(
         Loader(),
         lib.Button(
             "Analyze",
-            hx_get=f"/analyze/{image_name}",
-            hx_target=f"#actions-{image_name} #message",
-            hx_indicator=f"#actions-{image_name} #loader",
+            hx_get=f"/analyze/{id}",
+            hx_target=f"#actions-{id} #message",
+            hx_indicator=f"#actions-{id} #loader",
             cls="primary pa-1",
         ),
         lib.Button(
             "Delete",
             cls="secondary pa-1",
-            hx_delete=f"/{image_name}",
+            hx_delete=f"/{id}",
             hx_confirm="Are you sure you want to delete this image?",
             hx_target="#images-table",
             hx_swap="outerHTML",
@@ -59,12 +59,12 @@ def ImagesTable() -> lib.Table:
                         src=f"data:image/png;base64, {image.b64}",
                     )
                 ),
-                lib.Td(image.name),
+                lib.Td(image.filename()),
                 lib.Td(
-                    ImageActions(image_name=image.name),
+                    ImageActions(id=image.id),
                     EmptyMessage(),
                     width="200px",
-                    id=f"actions-{image.name}",
+                    id=f"actions-{image.id}",
                 ),
             )
         )
