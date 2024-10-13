@@ -1,7 +1,8 @@
 import peewee as pw
 from dataclasses import dataclass
+import datetime
 
-db = pw.SqliteDatabase("new_db.db")
+db = pw.SqliteDatabase("db.db")
 db.connect()
 
 
@@ -16,21 +17,23 @@ class Photo(BaseModel):
     filename = pw.CharField(unique=True)
 
 
-# @dataclass
-# class Mask(BaseModel):
-#     id = sa.Column(sa.Uuid, primary_key=True)
-#     segmentation = sa.Column(sa.String)
-#     area = sa.Column(sa.Float)
-#     predicted_iou = sa.Column(sa.Float)
-#     point_coords = sa.Column(sa.String)
-#     stability_score = sa.Column(sa.Float)
-#     crop_box = sa.Column(sa.String)
-#     bbox = sa.Column(sa.String)
-#     photo_id = sa.Column(sa.Uuid, sa.ForeignKey(Photo.id))
-#     photo = sa.orm.relationship(Photo, backref="masks")
+class Mask(BaseModel):
+    id = pw.AutoField()
+    original_dict = pw.TextField()
+    color = pw.TextField()
+    batch_id = pw.DateTimeField()
+    photo = pw.ForeignKeyField(Photo, backref="masks")
+    photo_id = pw.FieldAccessor(Photo, "id", "photo_id")
+
+    def delete_batch(self, batch_id: datetime.datetime):
+        self.delete().where(Mask.batch_id == batch_id)
+
 
 # Photo.truncate_table()
-db.create_tables([Photo])
+# Mask.truncate_table()
+db.create_tables([Photo, Mask])
 
-print("table:", Photo._meta.sorted_field_names)
+print("photos table:", Photo._meta.sorted_field_names)
 print("photos:", [p.filename for p in Photo.select()])
+print("masks table:", Mask._meta.sorted_field_names)
+print("masks:", [m.id for m in Mask.select()])

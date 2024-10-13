@@ -8,11 +8,13 @@ import numpy as np
 from src.modules.mask import Mask
 import src.modules.mask as mask_module
 import src.modules.utils as utils
+import datetime
 import base64
 from src.modules.storage import storage
 
 
 class Photo(np.ndarray):
+    storage_obj: storage.Photo
     id: int
     filename: str
 
@@ -22,6 +24,7 @@ class Photo(np.ndarray):
             raise FileNotFoundError(f"Photo with id {id} not found")
         print(f"Photo({photo.id}) loaded from db")
 
+        self.storage_obj = photo
         self.id = id
         self.filename = photo.filename
 
@@ -52,7 +55,13 @@ class Photo(np.ndarray):
 
     def generate_masks(self, mask_generator: SamAutomaticMaskGenerator):
         sam_results = mask_generator.generate(self)
-        masks = [Mask(mask) for mask in sam_results]
+        batch_id = datetime.datetime.now()
+
+        masks_from_previus_batch = self.storage_obj.masks.select()
+        if len(masks_from_previus_batch) > 0:
+            masks_from_previus_batch[0].delete_batch(batch_id)
+
+        masks = [Mask.create_new(mask, self.id, batch_id) for mask in sam_results]
         filtered_results = filter_masks(masks, self)
         sorted_masks = mask_module.sort_masks(filtered_results)
 
