@@ -67,6 +67,9 @@ class Photo(np.ndarray):
 
         return sorted_masks
 
+    def get_masks(self) -> list[Mask]:
+        return [Mask(mask.id) for mask in self.storage_obj.masks.select()]
+
     def is_touching_image_edge(self, mask) -> bool:
         height, width, _ = self.shape
         contours = mask.contours

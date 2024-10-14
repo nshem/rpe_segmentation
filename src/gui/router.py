@@ -57,7 +57,10 @@ def delete(id: int):
 def get(id: int):
     try:
         s = sample.Sample(id=id)
-        s.generate_masks()
+        if len(s.masks) == 0:
+            print("Generating masks")
+            s.generate_masks()
+
         plots.display(s)
         return components.Success(
             f"Done Analyzing image: {id} - Displaying plotly in a new tab"
