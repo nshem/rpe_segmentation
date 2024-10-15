@@ -18,26 +18,37 @@ class Photo(np.ndarray):
     id: int
     filename: str
 
-    def __new__(self, id: int):
-        photo = storage.Photo.get_by_id(id)
-        if not photo:
+    def __new__(
+        self, id: int
+    ):  ## using __new__ instead of __init__ because np.ndarray uses it, and we want to inherit from it
+
+        # load photo from db by id
+        print(f"Loading photo with id {id}")
+        storage_photo = storage.Photo.get_by_id(id)
+        if not storage_photo:
             raise FileNotFoundError(f"Photo with id {id} not found")
-        print(f"Photo({photo.id}) loaded from db")
+        print(f"Photo({storage_photo.id}) loaded from db")
 
-        self.storage_obj = photo
-        self.id = id
-        self.filename = photo.filename
-
-        _bytes = base64.b64decode(photo.nparray)
+        # decode image from db: base64 string to np.ndarray
+        _bytes = base64.b64decode(storage_photo.nparray)
         img = np.frombuffer(_bytes, dtype=np.uint8)
         img = cv2.imdecode(img, cv2.IMREAD_COLOR)
 
-        return super().__new__(
+        # create new instance of np.ndarray
+        self = super().__new__(
             self, shape=img.shape, dtype=img.dtype, strides=img.strides, buffer=img
         )
 
+        # set attributes to created instance (note we overrided self^)
+        self.storage_obj = storage_photo
+        self.id = id
+        self.filename = storage_photo.filename
+
+        return self
+
     @classmethod
     def create_new(cls, _filename: str, _bytes: bytes):
+        print(f"creating photo with id {id}")
         try:
             storage_obj = (
                 storage.Photo.select().where(storage.Photo.filename == _filename).get()
@@ -46,8 +57,11 @@ class Photo(np.ndarray):
             storage_obj = storage.Photo.create(
                 filename=_filename, nparray=base64.b64encode(_bytes).decode("utf-8")
             )
-
         return Photo(storage_obj.id)
+
+    @classmethod
+    def get_all_ids(cls):
+        return [photo.id for photo in storage.Photo.select(storage.Photo.id)]
 
     def delete(self):
         print(f"deleting photo with id {self.id}")
@@ -69,6 +83,9 @@ class Photo(np.ndarray):
 
     def get_masks(self) -> list[Mask]:
         return [Mask(mask.id) for mask in self.storage_obj.masks.select()]
+
+    def has_masks(self) -> bool:
+        return self.storage_obj.has_masks()
 
     def is_touching_image_edge(self, mask) -> bool:
         height, width, _ = self.shape

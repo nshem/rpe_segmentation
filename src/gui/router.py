@@ -2,7 +2,7 @@ import os
 import logging
 from fasthtml.common import *
 
-from src.modules import sample
+from src.modules.sample import Sample
 from src.modules.photo import Photo
 from src.gui import components, plots
 from src.gui.headers import headers
@@ -56,7 +56,7 @@ def delete(id: int):
 @rt("/analyze/{id}")
 def get(id: int):
     try:
-        s = sample.Sample(id=id)
+        s = Sample(id)
         if len(s.masks) == 0:
             print("Generating masks")
             s.generate_masks()

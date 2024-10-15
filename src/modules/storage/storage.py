@@ -16,6 +16,9 @@ class Photo(BaseModel):
     nparray = pw.TextField()
     filename = pw.CharField(unique=True)
 
+    def has_masks(self):
+        return Mask.select().where(Mask.photo_id == self.id).exists()
+
 
 class Mask(BaseModel):
     id = pw.AutoField()

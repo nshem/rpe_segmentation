@@ -46,25 +46,26 @@ def ImageActions(id: int):
 
 
 def ImagesTable() -> lib.Table:
-    images: list[utils.ImageData] = utils.load_images()
+    samples: list[utils.SampleData] = utils.load_all_samples()
 
     rows = []
-    for image in images:
+    for sample in samples:
         rows.append(
             lib.Tr(
                 lib.Td(
                     lib.Img(
                         height="100%",
                         width="70px",
-                        src=f"data:image/png;base64, {image.b64}",
+                        src=f"data:image/png;base64, {sample.b64}",
                     )
                 ),
-                lib.Td(image.filename()),
+                lib.Td(sample.filename()),
+                lib.Td("✅" if sample.has_masks else ""),
                 lib.Td(
-                    ImageActions(id=image.id),
+                    ImageActions(id=sample.id),
                     EmptyMessage(),
                     width="200px",
-                    id=f"actions-{image.id}",
+                    id=f"actions-{sample.id}",
                 ),
             )
         )
@@ -74,6 +75,7 @@ def ImagesTable() -> lib.Table:
             lib.Tr(
                 lib.Th("Image"),
                 lib.Th("Name"),
+                lib.Th("Masks"),
                 lib.Th("Actions"),
             )
         ),
