@@ -461,6 +461,10 @@ button {
     box-shadow: none !important;
 }
 
+button:hover {
+    filter: brightness(130%);
+}
+
 :where(button, [type=submit], [type=reset], [type=button], [role=button])[hx-disable],
 :where(fieldset[hx-disable]) :is(button, [type=submit], [type=button], [type=reset], [role=button]) {
     opacity: 0.5;

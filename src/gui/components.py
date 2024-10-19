@@ -148,7 +148,7 @@ def SelectionButtons() -> str:
                 code=f"selectCheckboxesAction(true, '{SELECT_ROW_CHECKBOX_CLS}')",
             ),
             "Select all",
-            cls="mx-1",
+            cls="pico-color-purple-350 mx-1",
         ),
         lib.Button(
             xlib.On(
@@ -156,7 +156,7 @@ def SelectionButtons() -> str:
                 code=f"selectCheckboxesAction(false, '{SELECT_ROW_CHECKBOX_CLS}')",
             ),
             "Deselect all",
-            cls="mx-1",
+            cls="pico-color-purple-350 mx-1",
         ),
     ]
 
@@ -186,7 +186,7 @@ def BatchActions() -> str:
         buttons.append(
             lib.Button(
                 action["name"],
-                cls="primary",
+                cls="pico-color-purple-350",
                 hx_post=action["hx_post"],
                 hx_vals=f'js:samples: getSelectedSamples("{SELECT_ROW_CHECKBOX_CLS}")',
                 hx_target="#batch-actions #message",
