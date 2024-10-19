@@ -2,6 +2,8 @@ import base64, os, logging
 from src.modules.sample import Sample
 from src.modules.storage import storage
 
+from fasthtml.common import *
+
 
 class SampleData:
     name: str
@@ -39,17 +41,7 @@ def load_all_samples() -> list[SampleData]:
     return samplesDisplayData
 
 
-# def load_from_folder():
-#     image_data: list[SampleData] = []
-#     try:
-#         for file in os.listdir(os.getenv("SAMPLES_PATH", "")):
-#             if not file.endswith(".png"):
-#                 continue
-
-#             s = Sample(file)
-#             img = s.photo.to_png_bytes()
-#             image_name = file.split(".")[0]
-#             image_data.append(SampleData(_b64=img, _name=image_name))
-#     except Exception as e:
-#         logging.error(e)
-#     return image_data
+async def extract_sample_ids_from_request(request: Request) -> list[int]:
+    form = await request.form()
+    sample_ids = [int(sample_id) for sample_id in form.getlist("samples")]
+    return sample_ids

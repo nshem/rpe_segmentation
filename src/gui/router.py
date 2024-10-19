@@ -5,7 +5,7 @@ from fasthtml.common import *
 
 from src.modules.sample import Sample
 from src.modules.photo import Photo
-from src.gui import components, plots
+from src.gui import components, plots, utils
 from src.gui.headers import headers
 
 debug = os.getenv("DEBUG", "True") == "True"
@@ -45,69 +45,57 @@ async def upload_image(request: Request):
     return components.Content(context)
 
 
-@rt("/{id}")
-def delete(id: int):
-    try:
-        Photo(id).delete()
-    except Exception as e:
-        logging.error(e)
-    return components.ImagesTable()
-
-
-@rt("/delete_masks/{id}")
-def delete_masks(id: int):
-    try:
-        Sample(id).photo.delete_masks()
-        return components.Success(f"Deleted masks for image: {id}")
-    except Exception as e:
-        logging.error(e)
-    return components.Error(f"Error deleting masks: {id}")
-
-
-@rt("/analyze/{id}")
-def get(id: int):
-    try:
-        s = Sample(id)
-        if len(s.masks) == 0:
-            print("Generating masks")
-            s.generate_masks()
-
-        return components.Success(f"Done Analyzing image: {id}")
-    except Exception as e:
-        logging.error(e)
-    print(f"Done Analyzing image: {id}")
-    return components.Error(f"Error analyzing image: {id}")
-
-
-@rt("/plot/{id}")
-def get(id: int):
-    try:
-        s = Sample(id)
-        if len(s.masks) == 0:
-            raise Exception("No masks found")
-
-        plots.display(s)
-        return components.Success(f"{id} - Displaying plotly in a new tab")
-    except Exception as e:
-        logging.error(e)
-    print(f"Displaying plotly: {id}")
-    return components.Error(f"Error Displaying plotly: {id}")
-
-
-@rt("/plot_selected")
+@rt("/delete")
 async def post(request: Request):
     try:
-        form = await request.form()
-        samples = form.getlist("samples")
-        print("Plotting selected images!", samples)
+        sample_ids = await utils.extract_sample_ids_from_request(request)
 
-        for sample_id in samples:
+        for sample_id in sample_ids:
+            Photo(sample_id).delete()
+        return components.Success(f"Deleted image: {sample_ids}")
+    except Exception as e:
+        logging.error(e)
+    return components.Error(f"Error deleting: {sample_ids}")
+
+
+@rt("/delete_masks")
+async def post(request: Request):
+    try:
+        sample_ids = await utils.extract_sample_ids_from_request(request)
+        print("Analyzing selected images!", sample_ids)
+
+        for sample_id in sample_ids:
+            Sample(sample_id).photo.delete_masks()
+        return components.Success(f"Deleted masks for image: {sample_ids}")
+    except Exception as e:
+        logging.error(e)
+    return components.Error(f"Error deleting masks: {sample_ids}")
+
+
+@rt("/plot")
+async def post(request: Request):
+    try:
+        sample_ids = await utils.extract_sample_ids_from_request(request)
+        for sample_id in sample_ids:
             id = int(sample_id)
             sample = Sample(id)
             if len(sample.masks) == 0:
                 raise Exception("No masks found: " + sample.filename)
             plots.display(sample)
 
+        return components.Success("Done Analyzing selected images")
+    except Exception as e:
+        logging.error(e)
+        return components.Error("Error analyzing selected images: " + str(e))
+
+
+@rt("/analyze")
+async def post(request: Request):
+    try:
+        sample_ids = await utils.extract_sample_ids_from_request(request)
+
+        for sample_id in sample_ids:
+            Sample(sample_id).generate_masks()
         return components.Success("Done Analyzing selected images")
     except Exception as e:
         logging.error(e)

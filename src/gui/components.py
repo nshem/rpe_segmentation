@@ -34,37 +34,42 @@ def RowCheckbox(sample: utils.SampleData) -> str:
 
 
 def ImageActions(sample: utils.SampleData):
+    actions = [
+        {
+            "name": "Plot",
+            "hx_disable": not sample.has_masks,
+            "hx_post": f"/plot",
+        },
+        {
+            "name": "Delete Masks",
+            "hx_post": f"/delete_masks",
+        },
+        {
+            "name": "Analyze",
+            "hx_post": f"/analyze",
+        },
+        {
+            "name": "Delete",
+            "hx_post": f"/delete",
+            "hx_confirm": "Are you sure you want to delete this sample?",
+        },
+    ]
+
+    buttons = []
+    for action in actions:
+        buttons.append(
+            lib.Button(
+                action["name"],
+                cls="primary pa-1",
+                hx_vals=f'{{"samples": [{sample.id}]}}',
+                hx_target=f"#actions-{sample.id} #message",
+                hx_indicator=f"#actions-{sample.id} #loader",
+                **{k: v for k, v in action.items() if k != "name"},
+            )
+        )
+
     return lib.Div(
-        lib.Button(
-            "Plot",
-            hx_disable=not sample.has_masks,
-            hx_get=f"/plot/{sample.id}",
-            hx_target=f"#actions-{sample.id} #message",
-            hx_indicator=f"#actions-{sample.id} #loader",
-            cls="primary pa-1",
-        ),
-        lib.Button(
-            "Delete Masks",
-            hx_get=f"/delete_masks/{sample.id}",
-            hx_target=f"#actions-{sample.id} #message",
-            hx_indicator=f"#actions-{sample.id} #loader",
-            cls="primary pa-1",
-        ),
-        lib.Button(
-            "Analyze",
-            hx_get=f"/analyze/{sample.id}",
-            hx_target=f"#actions-{sample.id} #message",
-            hx_indicator=f"#actions-{sample.id} #loader",
-            cls="primary pa-1",
-        ),
-        lib.Button(
-            "Delete",
-            cls="secondary pa-1",
-            hx_delete=f"/{sample.id}",
-            hx_confirm="Are you sure you want to delete this image?",
-            hx_target="#images-table",
-            hx_swap="outerHTML",
-        ),
+        *buttons,
         Loader(),
         cls="d-flex ma-1 actions",
     )
@@ -157,15 +162,39 @@ def SelectionButtons() -> str:
 
 
 def BatchActions() -> str:
+    batch_actions = [
+        {
+            "name": "Plot",
+            "hx_post": "/plot",
+        },
+        {
+            "name": "Analyze",
+            "hx_post": "/analyze",
+        },
+        {
+            "name": "Delete masks",
+            "hx_post": "/delete_masks",
+        },
+        {
+            "name": "Delete sample",
+            "hx_post": "/delete",
+        },
+    ]
+
+    buttons = []
+    for action in batch_actions:
+        buttons.append(
+            lib.Button(
+                action["name"],
+                cls="primary",
+                hx_post=action["hx_post"],
+                hx_vals=f'js:samples: getSelectedSamples("{SELECT_ROW_CHECKBOX_CLS}")',
+                hx_target="#batch-actions #message",
+                hx_indicator="#batch-actions #loader",
+            )
+        )
     return lib.Div(
-        lib.Button(
-            "Plot selected",
-            cls="primary",
-            hx_post="/plot_selected",
-            hx_vals=f'js:samples: getSelectedSamples("{SELECT_ROW_CHECKBOX_CLS}")',
-            hx_target=f"#batch-actions #message",
-            hx_indicator=f"#batch-actions #loader",
-        ),
+        *buttons,
         Loader(),
         EmptyMessage(),
         id="batch-actions",
