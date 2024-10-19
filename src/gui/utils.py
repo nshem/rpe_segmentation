@@ -45,3 +45,15 @@ async def extract_sample_ids_from_request(request: Request) -> list[int]:
     form = await request.form()
     sample_ids = [int(sample_id) for sample_id in form.getlist("samples")]
     return sample_ids
+
+
+def set_action_target(context: dict, sample_ids: list[int]):
+    if len(sample_ids) == 1:
+        context["action_sample_id"] = sample_ids[0]
+    else:
+        context["action_sample_id"] = None
+
+
+def set_action_message(context: dict, success: bool, message: str):
+    context["action_success"] = success
+    context["action_message"] = message

@@ -21,6 +21,23 @@ def Success(message: str) -> str:
     return lib.Small(message, cls="pico-color-green-500", id="message")
 
 
+def MessageFromContext(context: dict, sample_id=None) -> str:
+    message = EmptyMessage()
+
+    action_sample_id = context.get("action_sample_id", None)
+    if sample_id != action_sample_id:
+        return message
+
+    if context.get("action_success", None) is not None:
+        message = (
+            Success(context.get("action_message", ""))
+            if context["action_success"]
+            else Error(context.get("action_message", ""))
+        )
+
+    return message
+
+
 def Loader() -> str:
     return lib.H4(cls=f"loader mx-1", id="loader")
 
@@ -42,10 +59,12 @@ def ImageActions(sample: utils.SampleData):
         },
         {
             "name": "Delete Masks",
+            "hx_disable": not sample.has_masks,
             "hx_post": f"/delete_masks",
         },
         {
             "name": "Analyze",
+            "hx_disable": sample.has_masks,
             "hx_post": f"/analyze",
         },
         {
@@ -62,7 +81,8 @@ def ImageActions(sample: utils.SampleData):
                 action["name"],
                 cls="primary pa-1",
                 hx_vals=f'{{"samples": [{sample.id}]}}',
-                hx_target=f"#actions-{sample.id} #message",
+                hx_target=f"#{HOME_ID}",
+                hx_swap="innerHTML",
                 hx_indicator=f"#actions-{sample.id} #loader",
                 **{k: v for k, v in action.items() if k != "name"},
             )
@@ -75,7 +95,9 @@ def ImageActions(sample: utils.SampleData):
     )
 
 
-def ImagesTable() -> lib.Table:
+def ImagesTable(
+    context: dict,
+) -> lib.Table:
     samples: list[utils.SampleData] = utils.load_all_samples()
 
     rows = []
@@ -94,7 +116,7 @@ def ImagesTable() -> lib.Table:
                 lib.Td("✨" if sample.has_masks else ""),
                 lib.Td(
                     ImageActions(sample),
-                    EmptyMessage(),
+                    MessageFromContext(context, sample.id),
                     width="200px",
                     id=f"actions-{sample.id}",
                 ),
@@ -161,7 +183,7 @@ def SelectionButtons() -> str:
     ]
 
 
-def BatchActions() -> str:
+def BatchActions(context: dict) -> str:
     batch_actions = [
         {
             "name": "Plot",
@@ -176,7 +198,7 @@ def BatchActions() -> str:
             "hx_post": "/delete_masks",
         },
         {
-            "name": "Delete sample",
+            "name": "Delete samples",
             "hx_post": "/delete",
         },
     ]
@@ -189,14 +211,16 @@ def BatchActions() -> str:
                 cls="pico-color-purple-350",
                 hx_post=action["hx_post"],
                 hx_vals=f'js:samples: getSelectedSamples("{SELECT_ROW_CHECKBOX_CLS}")',
-                hx_target="#batch-actions #message",
+                hx_target=f"#{HOME_ID}",
+                hx_swap="innerHTML",
                 hx_indicator="#batch-actions #loader",
             )
         )
+
     return lib.Div(
         *buttons,
         Loader(),
-        EmptyMessage(),
+        MessageFromContext(context),
         id="batch-actions",
         cls="d-flex",
     )
@@ -207,7 +231,7 @@ def Content(context: dict) -> str:
         lib.H1("👁️ RPE Segmentation"),
         lib.Div(id="plot"),
         Br(),
-        lib.Div(*SelectionButtons(), ImagesTable(), BatchActions()),
+        lib.Div(*SelectionButtons(), ImagesTable(context), BatchActions(context)),
         Br(),
         UploadPhotosForm(
             context.get("success", None), context.get("upload_message", "")

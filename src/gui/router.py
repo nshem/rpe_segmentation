@@ -49,33 +49,46 @@ async def upload_image(request: Request):
 async def post(request: Request):
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
+        utils.set_action_target(context, sample_ids)
 
         for sample_id in sample_ids:
             Photo(sample_id).delete()
-        return components.Success(f"Deleted image: {sample_ids}")
+
+        utils.set_action_message(context, True, f"Deleted images: {sample_ids}")
     except Exception as e:
         logging.error(e)
-    return components.Error(f"Error deleting: {sample_ids}")
+        utils.set_action_message(
+            context, False, f"Error deleting {sample_ids}: " + str(e)
+        )
+    return components.Content(context)
 
 
 @rt("/delete_masks")
 async def post(request: Request):
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
-        print("Analyzing selected images!", sample_ids)
+        utils.set_action_target(context, sample_ids)
 
         for sample_id in sample_ids:
             Sample(sample_id).photo.delete_masks()
-        return components.Success(f"Deleted masks for image: {sample_ids}")
+
+        utils.set_action_message(
+            context, True, f"Deleted masks for samples: {sample_ids}"
+        )
     except Exception as e:
         logging.error(e)
-    return components.Error(f"Error deleting masks: {sample_ids}")
+        utils.set_action_message(
+            context, False, f"Error deleting masks for {sample_ids}: " + str(e)
+        )
+    return components.Content(context)
 
 
 @rt("/plot")
 async def post(request: Request):
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
+        utils.set_action_target(context, sample_ids)
+
         for sample_id in sample_ids:
             id = int(sample_id)
             sample = Sample(id)
@@ -83,20 +96,32 @@ async def post(request: Request):
                 raise Exception("No masks found: " + sample.filename)
             plots.display(sample)
 
-        return components.Success("Done Analyzing selected images")
+        utils.set_action_message(
+            context, True, f"Plotted selected images: {sample_ids}"
+        )
     except Exception as e:
         logging.error(e)
-        return components.Error("Error analyzing selected images: " + str(e))
+        utils.set_action_message(
+            context, False, f"Error plotting selected images {sample_ids}: " + str(e)
+        )
+    return components.Content(context)
 
 
 @rt("/analyze")
 async def post(request: Request):
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
+        utils.set_action_target(context, sample_ids)
 
         for sample_id in sample_ids:
             Sample(sample_id).generate_masks()
-        return components.Success("Done Analyzing selected images")
+
+        utils.set_action_message(
+            context, True, f"Done Analyzing selected images: {sample_ids}"
+        )
     except Exception as e:
         logging.error(e)
-        return components.Error("Error analyzing selected images: " + str(e))
+        utils.set_action_message(
+            context, False, f"Error analyzing selected images {sample_ids}: " + str(e)
+        )
+    return components.Content(context)
