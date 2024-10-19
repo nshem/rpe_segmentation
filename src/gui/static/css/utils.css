@@ -468,3 +468,9 @@ button {
     cursor: not-allowed;
     text-decoration: none;
 }
+
+.actions {
+    button {
+        font-size: 0.8rem !important;
+    }
+}

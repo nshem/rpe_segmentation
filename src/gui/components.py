@@ -25,7 +25,6 @@ def Loader() -> str:
 
 def ImageActions(sample: utils.SampleData):
     return lib.Div(
-        Loader(),
         lib.Button(
             "Plot",
             hx_disable=not sample.has_masks,
@@ -56,7 +55,8 @@ def ImageActions(sample: utils.SampleData):
             hx_target="#images-table",
             hx_swap="outerHTML",
         ),
-        cls="d-flex ma-1",
+        Loader(),
+        cls="d-flex ma-1 actions",
     )
 
 
@@ -85,15 +85,11 @@ def ImagesTable() -> lib.Table:
             )
         )
 
+    headers_text = ["Image", "Name", "Masks", "Actions"]
+    headers = [lib.Th(header) for header in headers_text]
+
     return lib.Table(
-        lib.Thead(
-            lib.Tr(
-                lib.Th("Image"),
-                lib.Th("Name"),
-                lib.Th("Masks"),
-                lib.Th("Actions"),
-            )
-        ),
+        lib.Thead(lib.Tr(*headers)),
         lib.Tbody(*rows),
         id="images-table",
     )
