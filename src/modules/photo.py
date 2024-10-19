@@ -71,15 +71,20 @@ class Photo(np.ndarray):
         sam_results = mask_generator.generate(self)
         batch_id = datetime.datetime.now()
 
-        masks_from_previus_batch = self.storage_obj.masks.select()
-        if len(masks_from_previus_batch) > 0:
-            masks_from_previus_batch[0].delete_batch(batch_id)
+        self.delete_masks()
 
         masks = [Mask.create_new(mask, self.id, batch_id) for mask in sam_results]
         filtered_results = filter_masks(masks, self)
         sorted_masks = mask_module.sort_masks(filtered_results)
 
         return sorted_masks
+
+    def delete_masks(self):
+        try:
+            self.storage_obj.delete_masks()
+        except Exception as e:
+            print(e)
+            raise Exception(f"Failed to delete masks for photo with id {self.id}: {e}")
 
     def get_masks(self) -> list[Mask]:
         return [Mask(mask.id) for mask in self.storage_obj.masks.select()]

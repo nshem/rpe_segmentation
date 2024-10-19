@@ -19,6 +19,9 @@ class Photo(BaseModel):
     def has_masks(self):
         return Mask.select().where(Mask.photo_id == self.id).exists()
 
+    def delete_masks(self):
+        return Mask.delete().where(Mask.photo_id == self.id).execute()
+
 
 class Mask(BaseModel):
     id = pw.AutoField()
@@ -27,9 +30,6 @@ class Mask(BaseModel):
     batch_id = pw.DateTimeField()
     photo = pw.ForeignKeyField(Photo, backref="masks")
     photo_id = pw.FieldAccessor(Photo, "id", "photo_id")
-
-    def delete_batch(self, batch_id: datetime.datetime):
-        self.delete().where(Mask.batch_id == batch_id)
 
 
 # Photo.truncate_table()

@@ -12,7 +12,7 @@ class Sample:
         self.has_masks = self.photo.has_masks()
 
     def generate_masks(self):
-        self.masks = self.photo.generate_masks(generator)
+        self._masks = self.photo.generate_masks(generator)
 
     @classmethod
     def get_all(cls):

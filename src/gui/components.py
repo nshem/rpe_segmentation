@@ -23,20 +23,35 @@ def Loader() -> str:
     return lib.H4(cls=f"loader mx-1", id="loader")
 
 
-def ImageActions(id: int):
+def ImageActions(sample: utils.SampleData):
     return lib.Div(
         Loader(),
         lib.Button(
+            "Plot",
+            hx_disable=not sample.has_masks,
+            hx_get=f"/plot/{sample.id}",
+            hx_target=f"#actions-{sample.id} #message",
+            hx_indicator=f"#actions-{sample.id} #loader",
+            cls="primary pa-1",
+        ),
+        lib.Button(
+            "Delete Masks",
+            hx_get=f"/delete_masks/{sample.id}",
+            hx_target=f"#actions-{sample.id} #message",
+            hx_indicator=f"#actions-{sample.id} #loader",
+            cls="primary pa-1",
+        ),
+        lib.Button(
             "Analyze",
-            hx_get=f"/analyze/{id}",
-            hx_target=f"#actions-{id} #message",
-            hx_indicator=f"#actions-{id} #loader",
+            hx_get=f"/analyze/{sample.id}",
+            hx_target=f"#actions-{sample.id} #message",
+            hx_indicator=f"#actions-{sample.id} #loader",
             cls="primary pa-1",
         ),
         lib.Button(
             "Delete",
             cls="secondary pa-1",
-            hx_delete=f"/{id}",
+            hx_delete=f"/{sample.id}",
             hx_confirm="Are you sure you want to delete this image?",
             hx_target="#images-table",
             hx_swap="outerHTML",
@@ -62,7 +77,7 @@ def ImagesTable() -> lib.Table:
                 lib.Td(sample.filename()),
                 lib.Td("✅" if sample.has_masks else ""),
                 lib.Td(
-                    ImageActions(id=sample.id),
+                    ImageActions(sample),
                     EmptyMessage(),
                     width="200px",
                     id=f"actions-{sample.id}",

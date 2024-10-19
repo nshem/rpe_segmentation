@@ -53,6 +53,16 @@ def delete(id: int):
     return components.ImagesTable()
 
 
+@rt("/delete_masks/{id}")
+def delete_masks(id: int):
+    try:
+        Sample(id).photo.delete_masks()
+        return components.Success(f"Deleted masks for image: {id}")
+    except Exception as e:
+        logging.error(e)
+    return components.Error(f"Error deleting masks: {id}")
+
+
 @rt("/analyze/{id}")
 def get(id: int):
     try:
@@ -61,11 +71,23 @@ def get(id: int):
             print("Generating masks")
             s.generate_masks()
 
-        plots.display(s)
-        return components.Success(
-            f"Done Analyzing image: {id} - Displaying plotly in a new tab"
-        )
+        return components.Success(f"Done Analyzing image: {id}")
     except Exception as e:
         logging.error(e)
     print(f"Done Analyzing image: {id}")
     return components.Error(f"Error analyzing image: {id}")
+
+
+@rt("/plot/{id}")
+def get(id: int):
+    try:
+        s = Sample(id)
+        if len(s.masks) == 0:
+            raise Exception("No masks found")
+
+        plots.display(s)
+        return components.Success(f"{id} - Displaying plotly in a new tab")
+    except Exception as e:
+        logging.error(e)
+    print(f"Displaying plotly: {id}")
+    return components.Error(f"Error Displaying plotly: {id}")
