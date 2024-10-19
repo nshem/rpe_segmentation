@@ -1,11 +1,11 @@
-# multiple images
+# V multiple images
 # multiple images analasys
 
 # distribution:
 # executable - test on diffrent os w/ docker
 
 # tabular output:
-# - postgres & class models
+# V postgres & class models
 # - export to file
 # - cache / data loader
 
@@ -14,11 +14,15 @@
 # - parallel ?
 
 # gui:
-# - samples table
-# - select image a show graphs
-# - file loader
+# V samples table
+# V select image a show graphs
+# V file loader
 
 # backlog:
 # - model tuning
 # - docs & readme
 # - tests
+
+# bugs:
+# - fix png only
+# - fix plotly spaces

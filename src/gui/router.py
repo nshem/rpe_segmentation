@@ -1,9 +1,11 @@
 import os
 import logging
+import json
 from fasthtml.common import *
 
-from src.modules import sample
-from src.gui import components, plots
+from src.modules.sample import Sample
+from src.modules.photo import Photo
+from src.gui import components, plots, utils
 from src.gui.headers import headers
 
 debug = os.getenv("DEBUG", "True") == "True"
@@ -30,11 +32,7 @@ async def upload_image(request: Request):
         images = form.getlist("images")
         for image in images:
             contents = await image.read()
-            with open(
-                os.path.join(os.getenv("SAMPLES_PATH", ""), image.filename), "wb"
-            ) as fos:
-                fos.write(contents)
-
+            Photo.create_new(_filename=image.filename, _bytes=contents)
             filenames.append(image.filename)
         context["success"] = True
         context["upload_message"] = "Files uploaded successfully: " + ", ".join(
@@ -47,26 +45,83 @@ async def upload_image(request: Request):
     return components.Content(context)
 
 
-@rt("/{image_name}")
-def delete(image_name: str):
+@rt("/delete")
+async def post(request: Request):
     try:
-        os.remove(os.path.join(os.getenv("SAMPLES_PATH", ""), image_name + ".png"))
+        sample_ids = await utils.extract_sample_ids_from_request(request)
+        utils.set_action_target(context, sample_ids)
+
+        for sample_id in sample_ids:
+            Photo(sample_id).delete()
+
+        utils.set_action_message(context, True, f"Deleted images: {sample_ids}")
     except Exception as e:
         logging.error(e)
-    return components.ImagesTable()
+        utils.set_action_message(
+            context, False, f"Error deleting {sample_ids}: " + str(e)
+        )
+    return components.Content(context)
 
 
-@rt("/analyze/{image_name}")
-def get(image_name: str):
+@rt("/delete_masks")
+async def post(request: Request):
     try:
-        print("Analyzing image: " + image_name)
-        s = sample.Sample(image_name + ".png")
-        print("Displaying image: " + image_name)
-        plots.display(s)
-        return components.Success(
-            "Done Analyzing image: " + image_name + " - Displaying plotly in a new tab"
+        sample_ids = await utils.extract_sample_ids_from_request(request)
+        utils.set_action_target(context, sample_ids)
+
+        for sample_id in sample_ids:
+            Sample(sample_id).photo.delete_masks()
+
+        utils.set_action_message(
+            context, True, f"Deleted masks for samples: {sample_ids}"
         )
     except Exception as e:
         logging.error(e)
-    print("Done Analyzing image: " + image_name)
-    return components.Error("Error analyzing image: " + image_name)
+        utils.set_action_message(
+            context, False, f"Error deleting masks for {sample_ids}: " + str(e)
+        )
+    return components.Content(context)
+
+
+@rt("/plot")
+async def post(request: Request):
+    try:
+        sample_ids = await utils.extract_sample_ids_from_request(request)
+        utils.set_action_target(context, sample_ids)
+
+        for sample_id in sample_ids:
+            id = int(sample_id)
+            sample = Sample(id)
+            if len(sample.masks) == 0:
+                raise Exception("No masks found: " + sample.filename)
+            plots.display(sample)
+
+        utils.set_action_message(
+            context, True, f"Plotted selected images: {sample_ids}"
+        )
+    except Exception as e:
+        logging.error(e)
+        utils.set_action_message(
+            context, False, f"Error plotting selected images {sample_ids}: " + str(e)
+        )
+    return components.Content(context)
+
+
+@rt("/analyze")
+async def post(request: Request):
+    try:
+        sample_ids = await utils.extract_sample_ids_from_request(request)
+        utils.set_action_target(context, sample_ids)
+
+        for sample_id in sample_ids:
+            Sample(sample_id).generate_masks()
+
+        utils.set_action_message(
+            context, True, f"Done Analyzing selected images: {sample_ids}"
+        )
+    except Exception as e:
+        logging.error(e)
+        utils.set_action_message(
+            context, False, f"Error analyzing selected images {sample_ids}: " + str(e)
+        )
+    return components.Content(context)

@@ -460,3 +460,21 @@ button {
     outline: 0px !important;
     box-shadow: none !important;
 }
+
+button:hover {
+    filter: brightness(130%);
+}
+
+:where(button, [type=submit], [type=reset], [type=button], [role=button])[hx-disable],
+:where(fieldset[hx-disable]) :is(button, [type=submit], [type=button], [type=reset], [role=button]) {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+    text-decoration: none;
+}
+
+.actions {
+    button {
+        font-size: 0.8rem !important;
+    }
+}
