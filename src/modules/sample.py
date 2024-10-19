@@ -2,8 +2,6 @@ from src.modules.photo import Photo
 from src.modules.mask import Mask
 from src.modules.sam import generator
 
-from multiprocessing import Pool
-
 
 class Sample:
     def __init__(self, _id: int):
