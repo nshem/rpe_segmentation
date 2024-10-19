@@ -8,6 +8,7 @@ class SampleData:
     b64: str
     id: int
     has_masks: bool = False
+    selected: bool = False
 
     def __init__(self, _id: int, _b64: str, _name: str, _has_masks: bool = False):
         self.b64 = _b64

@@ -1,10 +1,12 @@
 """UI components based on fasthtml"""
 
 import fasthtml.components as lib
+import fasthtml.xtend as xlib
 import fasthtml.pico as fp
 from src.gui import utils
 
 HOME_ID = "home"
+SELECT_ROW_CHECKBOX_CLS = "select-row-checkbox"
 
 
 def EmptyMessage() -> str:
@@ -21,6 +23,14 @@ def Success(message: str) -> str:
 
 def Loader() -> str:
     return lib.H4(cls=f"loader mx-1", id="loader")
+
+
+def RowCheckbox(sample: utils.SampleData) -> str:
+    return lib.Input(
+        type="checkbox",
+        cls=SELECT_ROW_CHECKBOX_CLS,
+        sample_id=sample.id,
+    )
 
 
 def ImageActions(sample: utils.SampleData):
@@ -67,6 +77,7 @@ def ImagesTable() -> lib.Table:
     for sample in samples:
         rows.append(
             lib.Tr(
+                lib.Td(RowCheckbox(sample)),
                 lib.Td(
                     lib.Img(
                         height="100%",
@@ -75,17 +86,19 @@ def ImagesTable() -> lib.Table:
                     )
                 ),
                 lib.Td(sample.filename()),
-                lib.Td("✅" if sample.has_masks else ""),
+                lib.Td("✨" if sample.has_masks else ""),
                 lib.Td(
                     ImageActions(sample),
                     EmptyMessage(),
                     width="200px",
                     id=f"actions-{sample.id}",
                 ),
+                id=f"sample-row-{sample.id}",
+                cls="sample-row",
             )
         )
 
-    headers_text = ["Image", "Name", "Masks", "Actions"]
+    headers_text = ["", "Image", "Name", "Masks", "Actions"]
     headers = [lib.Th(header) for header in headers_text]
 
     return lib.Table(
@@ -95,7 +108,7 @@ def ImagesTable() -> lib.Table:
     )
 
 
-def ImagesForm(success: any, message: str) -> str:
+def UploadPhotosForm(success: any, message: str) -> str:
     inp = lib.Input(
         type="file", name="images", multiple=True, required=True, accept="image/*"
     )
@@ -122,14 +135,54 @@ def Br() -> str:
     )
 
 
+def SelectionButtons() -> str:
+    return [
+        lib.Button(
+            xlib.On(
+                event="click",
+                code=f"selectCheckboxesAction(true, '{SELECT_ROW_CHECKBOX_CLS}')",
+            ),
+            "Select all",
+            cls="mx-1",
+        ),
+        lib.Button(
+            xlib.On(
+                event="click",
+                code=f"selectCheckboxesAction(false, '{SELECT_ROW_CHECKBOX_CLS}')",
+            ),
+            "Deselect all",
+            cls="mx-1",
+        ),
+    ]
+
+
+def BatchActions() -> str:
+    return lib.Div(
+        lib.Button(
+            "Plot selected",
+            cls="primary",
+            hx_post="/plot_selected",
+            hx_vals=f'js:samples: getSelectedSamples("{SELECT_ROW_CHECKBOX_CLS}")',
+            hx_target=f"#batch-actions #message",
+            hx_indicator=f"#batch-actions #loader",
+        ),
+        Loader(),
+        EmptyMessage(),
+        id="batch-actions",
+        cls="d-flex",
+    )
+
+
 def Content(context: dict) -> str:
     return lib.Div(
         lib.H1("👁️ RPE Segmentation"),
         lib.Div(id="plot"),
         Br(),
-        lib.Div(ImagesTable()),
+        lib.Div(*SelectionButtons(), ImagesTable(), BatchActions()),
         Br(),
-        ImagesForm(context.get("success", None), context.get("upload_message", "")),
+        UploadPhotosForm(
+            context.get("success", None), context.get("upload_message", "")
+        ),
         id=HOME_ID,
     )
 

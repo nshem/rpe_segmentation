@@ -25,6 +25,10 @@ class Sample:
 
         return self._masks
 
+    @property
+    def filename(self) -> str:
+        return self.photo.filename
+
 
 def load_sample_return_image(sample: Sample) -> str:
     return sample.photo.to_png_bytes()

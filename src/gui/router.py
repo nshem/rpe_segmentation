@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 from fasthtml.common import *
 
 from src.modules.sample import Sample
@@ -91,3 +92,23 @@ def get(id: int):
         logging.error(e)
     print(f"Displaying plotly: {id}")
     return components.Error(f"Error Displaying plotly: {id}")
+
+
+@rt("/plot_selected")
+async def post(request: Request):
+    try:
+        form = await request.form()
+        samples = form.getlist("samples")
+        print("Plotting selected images!", samples)
+
+        for sample_id in samples:
+            id = int(sample_id)
+            sample = Sample(id)
+            if len(sample.masks) == 0:
+                raise Exception("No masks found: " + sample.filename)
+            plots.display(sample)
+
+        return components.Success("Done Analyzing selected images")
+    except Exception as e:
+        logging.error(e)
+        return components.Error("Error analyzing selected images: " + str(e))
