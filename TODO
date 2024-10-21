@@ -25,4 +25,6 @@
 
 # bugs:
 # - fix png only
-# - fix plotly spaces
+# V fix plotly spaces
+# - colors by area
+# V remove touching edges

@@ -18,9 +18,10 @@ import datetime
 class Mask:
     storage_obj: storage.Mask
     id: int
+    photo_id: int
 
     segmentation: np.ndarray
-    area: int
+    area: float
     predicted_iou: float
     point_coords: List[List[float]]
     stability_score: float
@@ -35,6 +36,7 @@ class Mask:
         print(f"Loading mask with id {_id}")
         _mask: storage.Mask = storage.Mask.get_by_id(_id)
         self.storage_obj = _mask
+        self.photo_id = _mask.photo_id
 
         try:
             original_dict = string_to_class(_mask.original_dict)
@@ -97,16 +99,17 @@ class Mask:
 
 
 def sort_masks(masks: list[Mask]) -> list[Mask]:
-    return [mask for mask in sorted(masks, key=lambda x: x.area, reverse=True)]
+    return [mask for mask in sorted(masks, key=lambda x: x["area"], reverse=True)]
 
 
 # Define the class with type annotations
 class MaskData:
+
     def __init__(
         self,
         segmentation: Union[Dict[str, Any], np.ndarray],
         bbox: List[float],
-        area: int,
+        area: float,
         predicted_iou: float,
         point_coords: List[List[float]],
         stability_score: float,
