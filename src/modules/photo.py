@@ -73,11 +73,11 @@ class Photo(np.ndarray):
 
         self.delete_masks()
 
-        masks = [Mask.create_new(mask, self.id, batch_id) for mask in sam_results]
-        filtered_results = filter_masks(masks, self)
+        filtered_results = filter_masks(sam_results, self)
         sorted_masks = mask_module.sort_masks(filtered_results)
+        masks = [Mask.create_new(mask, self.id, batch_id) for mask in sorted_masks]
 
-        return sorted_masks
+        return masks
 
     def delete_masks(self):
         try:
@@ -92,9 +92,13 @@ class Photo(np.ndarray):
     def has_masks(self) -> bool:
         return self.storage_obj.has_masks()
 
-    def is_touching_image_edge(self, mask) -> bool:
+    def is_touching_image_edge(self, mask: dict) -> bool:
         height, width, _ = self.shape
-        contours = mask.contours
+        contours, _ = cv2.findContours(
+            mask["segmentation"].astype(np.uint8),
+            cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_NONE,
+        )
         for contour in contours:
             for point in contour:
                 x, y = point[0]
@@ -107,11 +111,11 @@ class Photo(np.ndarray):
         return base64.b64encode(buffer).decode("utf-8")
 
 
-def filter_masks(masks: list[Mask], original_image: Photo) -> list[Mask]:
-    areas_mean = np.mean([mask.area for mask in masks])
+def filter_masks(masks: list[dict], original_image: Photo) -> list[dict]:
+    areas_mean = np.mean([mask["area"] for mask in masks])
     return [
         mask
         for mask in masks
         if not original_image.is_touching_image_edge(mask)
-        and not utils.smaller_then_third_mean(mask.area, areas_mean)
+        and not utils.smaller_then_third_mean(mask["area"], areas_mean)
     ]

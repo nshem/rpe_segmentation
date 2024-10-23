@@ -12,3 +12,4 @@ mpld3==0.5.10
 tornado==6.4.1
 python-fasthtml==0.6.9
 peewee==3.17.6
+scipy==1.14.1

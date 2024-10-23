@@ -10,7 +10,7 @@
 # - cache / data loader
 
 # multiple images:
-# - batch processing
+# V batch processing
 # - parallel ?
 
 # gui:
@@ -25,4 +25,6 @@
 
 # bugs:
 # - fix png only
-# - fix plotly spaces
+# V fix plotly spaces
+# - colors by area
+# V remove touching edges
