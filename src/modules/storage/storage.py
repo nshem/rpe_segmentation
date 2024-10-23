@@ -35,8 +35,4 @@ class Mask(BaseModel):
 # Photo.truncate_table()
 # Mask.truncate_table()
 db.create_tables([Photo, Mask])
-
-print("photos table:", Photo._meta.sorted_field_names)
-print("photos:", [p.filename for p in Photo.select()])
-print("masks table:", Mask._meta.sorted_field_names)
-print("masks:", [m.id for m in Mask.select()])
+print(f"db: photos: {len(Photo.select())}, masks: {len(Mask.select())}")

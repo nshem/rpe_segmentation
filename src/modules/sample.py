@@ -1,6 +1,7 @@
 from src.modules.photo import Photo
-from src.modules.mask import Mask
+from src.modules.mask import Mask, MaskReport
 from src.modules.sam import generator
+from src.modules import utils
 
 
 class Sample:
@@ -13,6 +14,10 @@ class Sample:
 
     def generate_masks(self):
         self._masks = self.photo.generate_masks(generator)
+
+    def report(self) -> str:
+        masksReports = [MaskReport(mask).to_array() for mask in self.masks]
+        return utils.generate_xlsx_base64(masksReports)
 
     @classmethod
     def get_all(cls):

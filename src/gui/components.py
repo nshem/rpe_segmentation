@@ -50,6 +50,17 @@ def RowCheckbox(sample: utils.SampleData) -> str:
     )
 
 
+def DownloadScript(context: dict) -> str:
+    fileToDownload = context.get("fileToDownload", None)
+    if not fileToDownload:
+        return ""
+
+    context["fileToDownload"] = None
+    return xlib.Script(
+        code=f"downloadFile('{fileToDownload["filename"]}', '{fileToDownload["content"]}')"
+    )
+
+
 def ImageActions(sample: utils.SampleData):
     actions = [
         {
@@ -63,7 +74,7 @@ def ImageActions(sample: utils.SampleData):
             "hx_post": f"/delete_masks",
         },
         {
-            "name": "Analyze",
+            "name": "Generate Masks",
             "hx_disable": sample.has_masks,
             "hx_post": f"/analyze",
         },
@@ -71,6 +82,10 @@ def ImageActions(sample: utils.SampleData):
             "name": "Delete",
             "hx_post": f"/delete",
             "hx_confirm": "Are you sure you want to delete this sample?",
+        },
+        {
+            "name": "Export",
+            "hx_post": f"/export",
         },
     ]
 
@@ -190,7 +205,7 @@ def BatchActions(context: dict) -> str:
             "hx_post": "/plot",
         },
         {
-            "name": "Analyze",
+            "name": "Generate masks",
             "hx_post": "/analyze",
         },
         {
@@ -200,6 +215,10 @@ def BatchActions(context: dict) -> str:
         {
             "name": "Delete samples",
             "hx_post": "/delete",
+        },
+        {
+            "name": "Export",
+            "hx_post": "/export",
         },
     ]
 
@@ -236,6 +255,7 @@ def Content(context: dict) -> str:
         UploadPhotosForm(
             context.get("success", None), context.get("upload_message", "")
         ),
+        DownloadScript(context),
         id=HOME_ID,
     )
 

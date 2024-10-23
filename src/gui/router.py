@@ -1,6 +1,5 @@
 import os
 import logging
-import json
 from fasthtml.common import *
 
 from src.modules.sample import Sample
@@ -123,5 +122,33 @@ async def post(request: Request):
         logging.error(e)
         utils.set_action_message(
             context, False, f"Error analyzing selected images {sample_ids}: " + str(e)
+        )
+    return components.Content(context)
+
+
+@rt("/export")
+async def post(request: Request):
+    try:
+        sample_ids = await utils.extract_sample_ids_from_request(request)
+        utils.set_action_target(context, sample_ids)
+
+        reports = [Sample(sample_id).report() for sample_id in sample_ids]
+
+        utils.set_action_message(
+            context, True, f"Export report for samples: {sample_ids}"
+        )
+
+        if len(reports) == 1:
+            context["fileToDownload"] = {
+                "filename": "report.xlsx",
+                "content": reports[0],
+                "format": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,",
+            }
+        else:
+            raise Exception("batch report is not yet implemented")
+    except Exception as e:
+        logging.error(e)
+        utils.set_action_message(
+            context, False, f"Error Exporting report for {sample_ids}: " + str(e)
         )
     return components.Content(context)

@@ -14,6 +14,8 @@ import numpy as np
 from typing import Any, Dict, List, Union
 import datetime
 
+from dataclasses import dataclass
+
 
 class Mask:
     storage_obj: storage.Mask
@@ -37,6 +39,7 @@ class Mask:
         _mask: storage.Mask = storage.Mask.get_by_id(_id)
         self.storage_obj = _mask
         self.photo_id = _mask.photo_id
+        self.id = _id
 
         try:
             original_dict = string_to_class(_mask.original_dict)
@@ -150,3 +153,74 @@ def string_to_class(data_string: str) -> MaskData:
 
     # Create an instance of MaskData from the dictionary
     return MaskData(**data_dict)
+
+
+@dataclass
+class Coordinate:
+    x: float
+    y: float
+
+    def __init__(self, l: list[float]):
+        self.x = l[0]
+        self.y = l[1]
+
+    def __str__(self):
+        return f"({self.x}, {self.y})"
+
+
+@dataclass
+class MaskReport:
+    sample_id: str
+    mask_id: str
+    area: float
+    perimeter_length: float
+    coordinates: list[Coordinate]  # on the original image
+    centroid: Coordinate
+    focal_length: float
+    roundness: float  # area of the best fitting circle to the area of the mask
+    polygon_coordinates: list[Coordinate]  # on the original image
+    polygon_corners: int
+    polygon_resemblance: (
+        float  # between 0-1 - how much the polygon resembles the original mask
+    )
+
+    def __init__(self, mask: Mask):
+        self.sample_id = mask.photo_id
+        self.mask_id = mask.id
+        self.area = mask.area
+        self.coordinates = [Coordinate(coord) for coord in mask.point_coords]
+        self.perimeter_length = utils.calculate_perimiter_length(mask.point_coords)
+        self.centroid = Coordinate(utils.calc_centroid(mask.point_coords))
+        self.focal_length = utils.calculate_focal_length(mask.point_coords)
+        # self.roundness = mask.roundness
+        self.polygon_coordinates = [
+            Coordinate(coord) for coord in mask.polygon.exterior.coords
+        ]
+        self.polygon_corners = len(mask.polygon.exterior.coords) - 1
+        # self.polygon_resemblance = mask.polygon_resemblance
+
+    def for_gui(self) -> tuple[list[str], list[str]]:
+        attributes = []
+        values = []
+        for attribute, value in self.__dict__.items():
+            attributes.append(attribute)
+            values.append(str(value))
+
+        return attributes, values
+
+    def to_csv_row(self) -> str:
+        return f"{self.sample_id},{self.mask_id},{self.area},{self.perimeter_length},{self.centroid},{self.focal_length},{self.polygon_corners}\n"
+
+    def to_array(self) -> list:
+        return [
+            self.sample_id,
+            self.mask_id,
+            self.area,
+            self.perimeter_length,
+            self.centroid.__str__(),
+            self.focal_length,
+            self.polygon_corners,
+        ]
+
+    def to_csv_header() -> str:
+        return "sample_id,mask_id,area,perimeter_length,centroid,focal_length,polygon_corners\n"
