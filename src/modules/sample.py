@@ -17,6 +17,7 @@ class Sample:
 
     def report(self) -> str:
         masksReports = [MaskReport(mask).to_array() for mask in self.masks]
+        masksReports.insert(0, MaskReport.to_headers_array())
         return utils.generate_xlsx_base64(masksReports)
 
     @classmethod

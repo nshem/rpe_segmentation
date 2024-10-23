@@ -222,5 +222,16 @@ class MaskReport:
             self.polygon_corners,
         ]
 
+    def to_headers_array() -> list:
+        return [
+            "sample_id",
+            "mask_id",
+            "area",
+            "perimeter_length",
+            "centroid",
+            "focal_length",
+            "polygon_corners",
+        ]
+
     def to_csv_header() -> str:
         return "sample_id,mask_id,area,perimeter_length,centroid,focal_length,polygon_corners\n"
