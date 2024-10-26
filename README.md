@@ -1,87 +1,99 @@
-# RPE Segmentation
+# 👁️ RPE Segmentation and Analysis
+This project segments and analyzes Retinal Pigment Epithelium (RPE) cells in microscope images, providing tools to upload, process, and visualize cell segmentation. Follow the steps below for setup, usage, troubleshooting, and contributing.
 
-### Requirments
-1. internet connection for the setup only
-1. python 3.10 or 3.11 (no more no less, due to pytorch python version support) 
-1. running the setup script (see section below)
+### Requirements
+1.	Internet Connection: Needed only for the setup phase.
+2.	Python Version: Python 3.10 or 3.11 (required for compatibility with PyTorch dependencies).
+3.	Setup Script: Run once for initial configuration (see First Time Setup).
 
-### Running the program
-_if its the first time, see Setup below_
-1. open a terminal/powershell in the root folder "rpe_segmentation" or "rpe_segmentation-main" (open the folder -> in the white space, shift + right click -> Open in Terminal)
-2. run the following command and leave the terminal open as long as its running
-````
-python -m src.main
-````
-or 
-````
-python3 -m src.main
-````
-3. navigate to [http://localhost:5001](http://localhost:5001) in your browser, and should see something like the first picture below.
-(* tested only on chrome, others probably will be fine too)
-
-4. if you want to gracefully shut down the program, enter the terminal window and type ctrl+C before closing the terminal.
-
-### Usage
-1. scroll down, click Choose files, then click Upload
-1. for each sample you need to generate masks before plotting or exporting its data. you can also do so in batch operations - just click ````Select All```` above, and then on the action below the table (pink actions will apply to all selected samples)
-1. enjoy :)
-
-#### Troubleshooting
-1. if the window loads forever, you might exited the terminal without closing the process gracefully.
-run:
-unix ````for pid in $(lsof -ti :5001); do kill -9 $pid; done```` 
-windows ````(Get-NetTCPConnection -LocalPort 5001 -State Listen).OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force }````
-and run the program again
-
-### First Time Setup
-1. open a terminal/powershell in the destination folder (open the filder -> in the white space, shift + right click -> Open in Terminal)
-
-2. *windows only: if its your first time, youll probably need to set execution policy to be able to run scripts from the terminal. by running* ````Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser ````.
-
-3. download the files to the destination folder.
-preferebly using git clone, so you won't need to run the setup script again when getting updates (you might need to install [github cli](https://cli.github.com/), and authenticate as the user youve logged in to github to watch this repository).
+### Installation and First Time Setup
+To prepare the program for use:
+1.	Clone or Download the Repository:
+In the destination folder, open a terminal or PowerShell. If possible, clone the repository to simplify updates:
 ````
 gh repo clone nshem/rpe_segmentation
 ````
 
-4. enter the root folder of the project ("rpe_segmentation or rpe_segmentation-main") and open the terminal from there (or ````cd rpe_segmentation```` or ````cd rpe_segmentation-main```` in the existing terminal)
-
-5. execute the setup script by running the following command (it should take sometime, depends on your internet connection, 3-20 minutes)
+2.	Windows-only Step: Enable script execution.
+Open PowerShell and run:
 ````
-./setup_windows.ps1 
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+````
+
+3.	Run the Setup Script:
+Go to the project’s root folder (“rpe_segmentation” or “rpe_segmentation-main”) and run the appropriate setup script:
+````
+./setup_windows.ps1  # For Windows
+./setup_unix.sh      # For macOS/Linux
+````
+This may take 3–20 minutes depending on your internet speed. The setup script installs dependencies and launches the program.
+
+4.	After Setup: For future use, follow the Running the Program instructions below.
+
+### Running the Program
+1.	Open a Terminal:
+In the project’s root folder, open a terminal or PowerShell.
+
+2.	Start the Program:
+Run one of the following commands:
+````
+python -m src.main
 ````
 or
 ````
-./setup_unix.sh
+python3 -m src.main
 ````
 
-6. as its last operation, the setup script will run the program. but after the first time you can just run it as described in _Running the program_ section above.
+3.	Access the Interface:
+Open http://localhost:5001 in Chrome (recommended) or another browser to access the web interface.
 
-### Updates
-1. when needed, enter the root folder (rpe_segmentation or rpe_segmentation-main)
+4.	Gracefully Exit:
+To close the program, type Ctrl+C in the terminal before exiting.
 
-1. open a teminal and run 
-````git pull origin main````
-(make sure you have [*git* cli](https://git-scm.com/book/en/v2/Appendix-A:-Git-in-Other-Environments-Git-in-PowerShell) installed, not the same as *github* cli above)
+### Usage Guide
+1.	Uploading Files: Scroll to the “Upload” section, click Choose Files, select your images, and then click Upload.
+2.	Generating Masks and Data Analysis:
+  •	For each image, masks must be generated before you can plot or export data. the ✨ emoji indicates that masks has been generated succesfully for the sample.
+  •	Use Select All for batch operations to process multiple images. Then, select an action from the menu (pink actions apply to all selected samples).
+3.	Viewing Results: After processing, click "Plot" to see graphs and masks on a new tab, and "Export" to download an excel file.
 
-1. run the program again (no need for running the setup script) and it shoud work
+### Troubleshooting
+•	Stuck Loading Screen:
+  This may occur if the program wasn’t shut down correctly.
+  Run the following commands to force-terminate any lingering processes and restart the program:
+  Mac/Linux:
+  ````
+  for pid in $(lsof -ti :5001); do kill -9 $pid; done
+  ````
+  Windows:
+  ````
+  (Get-NetTCPConnection -LocalPort 5001 -State Listen).OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force }
+  ````
 
-1. troubleshooting after updates:
-  - database errors: delete the db.db file and run the program again
-  - python dependencies errors: run the setup script and run the program again
+### Updating the Program
+1.	Pull the Latest Changes:
+In the root folder, open a terminal and run:
+````
+git pull origin main
+````
+
+2.  Troubleshooting after update:
+  •	Database Errors: Delete the db.db file, then restart the program.
+  •	Python Dependency Errors: Rerun the setup script, then start the program again.
 
 ### Contributing
-if you made code changes please push them to a branch and create a pull rquest
+To contribute to the project please commit your changes to a side branch:
 ````
-git checkout -b "<change_name>"
+git checkout -b "<branch_name>"
 git add --all
-git commit -m "<change_description>"
-git push
+git commit -m "<description_of_changes>"
+git push origin <branch_name>
 ````
-enter the repository in github and create a pull request
-* note that if you've made changes without merging them to main and then pull updates, it might create a mess
+Then, create a pull request on GitHub.
+Note: If you pull updates without merging your changes, conflicts may arise.
 
 ### Examples
+Here’s a preview of the web interface and sample output:
 ![interface](./interface.png)
 
 ![example plot](./Figure_1.png)
