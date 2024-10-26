@@ -44,6 +44,8 @@ def load_all_samples() -> list[SampleData]:
 async def extract_sample_ids_from_request(request: Request) -> list[int]:
     form = await request.form()
     sample_ids = [int(sample_id) for sample_id in form.getlist("samples")]
+    if len(sample_ids) == 0:
+        raise Exception("No samples selected")
     return sample_ids
 
 
@@ -57,3 +59,12 @@ def set_action_target(context: dict, sample_ids: list[int]):
 def set_action_message(context: dict, success: bool, message: str):
     context["action_success"] = success
     context["action_message"] = message
+
+
+def contour_color(color: list[int]) -> list[int]:
+    r, g, b = color
+    brightness = (r * 299 + g * 587 + b * 114) / 1000
+    if brightness < 90:
+        return [255, 255, 255]
+    else:
+        return [0, 0, 0]

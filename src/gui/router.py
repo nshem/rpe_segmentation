@@ -1,5 +1,6 @@
 import os
 import logging
+import datetime
 from fasthtml.common import *
 
 from src.modules.sample import Sample
@@ -46,6 +47,7 @@ async def upload_image(request: Request):
 
 @rt("/delete")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
@@ -64,6 +66,7 @@ async def post(request: Request):
 
 @rt("/delete_masks")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
@@ -84,6 +87,7 @@ async def post(request: Request):
 
 @rt("/plot")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
@@ -108,6 +112,7 @@ async def post(request: Request):
 
 @rt("/analyze")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
@@ -128,24 +133,28 @@ async def post(request: Request):
 
 @rt("/export")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
-
-        reports = [Sample(sample_id).report() for sample_id in sample_ids]
 
         utils.set_action_message(
             context, True, f"Export report for samples: {sample_ids}"
         )
 
-        if len(reports) == 1:
+        time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if len(sample_ids) == 1:
             context["fileToDownload"] = {
-                "filename": "report.xlsx",
-                "content": reports[0],
+                "filename": f"report {time}.xlsx",
+                "content": Sample(sample_ids[0]).report(),
                 "format": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,",
             }
         else:
-            raise Exception("batch report is not yet implemented")
+            context["fileToDownload"] = {
+                "filename": f"batch report {time}.xlsx",
+                "content": Sample.report_by_ids(sample_ids),
+                "format": "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,",
+            }
     except Exception as e:
         logging.error(e)
         utils.set_action_message(

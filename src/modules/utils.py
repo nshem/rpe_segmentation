@@ -5,6 +5,21 @@ import base64
 from io import BytesIO
 
 
+class Coordinate:
+    x: float
+    y: float
+
+    def __init__(self, l: list[float]):
+        self.x = l[0]
+        self.y = l[1]
+
+    def __str__(self):
+        return f"({self.x}, {self.y})"
+
+    def __array__(self):
+        return np.array([self.x, self.y])
+
+
 def calculate_angle(coords: list[list], corner_index: int) -> float:
     num_points = len(coords)
 
@@ -25,7 +40,11 @@ def calculate_angle(coords: list[list], corner_index: int) -> float:
     return angle_degrees
 
 
-def calculate_perimiter_length(coords: list[list[float]]) -> float:
+def calculate_roundness(area: float, perimeter_length: float) -> float:
+    return (4 * np.pi * area) / (perimeter_length**2)
+
+
+def calculate_perimiter_length(coords: list[Coordinate]) -> float:
     return np.sum(
         [
             np.linalg.norm(np.array(coords[i]) - np.array(coords[i - 1]))
@@ -34,32 +53,10 @@ def calculate_perimiter_length(coords: list[list[float]]) -> float:
     )
 
 
-def calc_centroid(coords: list[list[float]]) -> list[float]:
-    x = [coord[0] for coord in coords]
-    y = [coord[1] for coord in coords]
-    return [sum(x) / len(coords), sum(y) / len(coords)]
-
-
-def calculate_focal_length(
-    coords: np.ndarray,
-) -> float:  # maximum distance between two vertices
-    try:
-        # Compute the convex hull to limit the number of points to check
-        hull = ConvexHull(coords)
-        hull_points = coords[hull.vertices]
-
-        # Find the maximum distance between any two points in the convex hull
-        max_distance = 0
-        for i in range(len(hull_points)):
-            for j in range(i + 1, len(hull_points)):
-                distance = np.linalg.norm(hull_points[i] - hull_points[j])
-                if distance > max_distance:
-                    max_distance = distance
-    except Exception as e:
-        print("Error calculating focal length", e)
-        return 0
-
-    return max_distance
+def calc_centroid(coords: list[Coordinate]) -> Coordinate:
+    x = [coord.x for coord in coords]
+    y = [coord.y for coord in coords]
+    return Coordinate([sum(x) / len(coords), sum(y) / len(coords)])
 
 
 def smaller_then_third_mean(area: int, areas_mean: float) -> bool:

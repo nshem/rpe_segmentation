@@ -33,6 +33,7 @@ class Mask:
     color: List[int]
     contours: List[np.ndarray]
     polygon: shapely.geometry.Polygon
+    center_coord: utils.Coordinate
 
     def __init__(self, _id: int):
         print(f"Loading mask with id {_id}")
@@ -61,6 +62,9 @@ class Mask:
         )
         self.contours = ctrs
         self.polygon = self._polygon_from_mask()
+        self.center_coord = utils.calc_centroid(
+            [utils.Coordinate(coords[0]) for coords in max(ctrs, key=cv2.contourArea)]
+        )
 
     @classmethod
     def create_new(
@@ -156,45 +160,32 @@ def string_to_class(data_string: str) -> MaskData:
 
 
 @dataclass
-class Coordinate:
-    x: float
-    y: float
-
-    def __init__(self, l: list[float]):
-        self.x = l[0]
-        self.y = l[1]
-
-    def __str__(self):
-        return f"({self.x}, {self.y})"
-
-
-@dataclass
 class MaskReport:
     sample_id: str
     mask_id: str
     area: float
     perimeter_length: float
-    coordinates: list[Coordinate]  # on the original image
-    centroid: Coordinate
-    focal_length: float
+    coordinates: list[utils.Coordinate]  # on the original image
+    centroid: utils.Coordinate
     roundness: float  # area of the best fitting circle to the area of the mask
-    polygon_coordinates: list[Coordinate]  # on the original image
+    polygon_coordinates: list[utils.Coordinate]  # on the original image
     polygon_corners: int
     polygon_resemblance: (
         float  # between 0-1 - how much the polygon resembles the original mask
     )
 
     def __init__(self, mask: Mask):
+        contour = max(mask.contours, key=cv2.contourArea)
         self.sample_id = mask.photo_id
         self.mask_id = mask.id
         self.area = mask.area
-        self.coordinates = [Coordinate(coord) for coord in mask.point_coords]
-        self.perimeter_length = utils.calculate_perimiter_length(mask.point_coords)
-        self.centroid = Coordinate(utils.calc_centroid(mask.point_coords))
-        self.focal_length = utils.calculate_focal_length(mask.point_coords)
+        self.coordinates = [utils.Coordinate(coord[0]) for coord in contour]
+        self.perimeter_length = utils.calculate_perimiter_length(self.coordinates)
+        self.centroid = mask.center_coord
+        self.roundness = utils.calculate_roundness(mask.area, self.perimeter_length)
         # self.roundness = mask.roundness
         self.polygon_coordinates = [
-            Coordinate(coord) for coord in mask.polygon.exterior.coords
+            utils.Coordinate(coord) for coord in mask.polygon.exterior.coords
         ]
         self.polygon_corners = len(mask.polygon.exterior.coords) - 1
         # self.polygon_resemblance = mask.polygon_resemblance
@@ -209,7 +200,7 @@ class MaskReport:
         return attributes, values
 
     def to_csv_row(self) -> str:
-        return f"{self.sample_id},{self.mask_id},{self.area},{self.perimeter_length},{self.centroid},{self.focal_length},{self.polygon_corners}\n"
+        return f"{self.sample_id},{self.mask_id},{self.area},{self.perimeter_length},{self.centroid},{self.roundness},{self.polygon_corners}\n"
 
     def to_array(self) -> list:
         return [
@@ -218,7 +209,7 @@ class MaskReport:
             self.area,
             self.perimeter_length,
             self.centroid.__str__(),
-            self.focal_length,
+            self.roundness,
             self.polygon_corners,
         ]
 
@@ -226,12 +217,12 @@ class MaskReport:
         return [
             "sample_id",
             "mask_id",
-            "area",
-            "perimeter_length",
-            "centroid",
-            "focal_length",
-            "polygon_corners",
+            "area (in pixels)",
+            "perimeter_length (in pixels)",
+            "centroid (center of shape coordinate)",
+            "roundness (area-perimeter ratio of the input shape divided by the said ratio for circle with the same perimeter. input circle will return 1, line will return 0)",
+            "polygon_corners (number of corners in the polygon)",
         ]
 
     def to_csv_header() -> str:
-        return "sample_id,mask_id,area,perimeter_length,centroid,focal_length,polygon_corners\n"
+        return "sample_id,mask_id,area,perimeter_length,centroid,roundness,polygon_corners\n"

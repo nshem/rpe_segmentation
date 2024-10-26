@@ -11,6 +11,7 @@ from src.modules.sample import Sample
 from src.modules.mask import Mask
 from src.modules.photo import Photo
 from shapely.geometry import Polygon
+from src.gui import utils
 
 
 def display_grid_of_all_polygons(ax: Axes, masks):
@@ -18,7 +19,6 @@ def display_grid_of_all_polygons(ax: Axes, masks):
     # display grid of all masks
     for i in range(len(masks)):
         x, y = masks[i].polygon.exterior.xy
-        # rot = transforms.Affine2D().rotate_deg(90)
         ax.plot(
             x,
             y,
@@ -38,9 +38,48 @@ def display_grid_of_all(ax: Axes, img: Photo, masks: list[Mask]):
     ax.axis(False)
     for mask in masks:
         contour = max(mask.contours, key=cv2.contourArea)
+        ## draw contours
         annotated = cv2.drawContours(
             image=img, contours=[contour], contourIdx=0, color=mask.color, thickness=2
         )
+
+        ## contour mask id for readability
+        annotated = cv2.putText(
+            img=annotated,
+            text=f"{mask.id}",
+            org=(
+                int(mask.center_coord.x) - len(str(mask.id)) * 5,
+                int(mask.center_coord.y) - 8,
+            ),
+            fontFace=cv2.FONT_HERSHEY_PLAIN,
+            fontScale=1,
+            thickness=5,
+            color=utils.contour_color(mask.color),
+        )
+        # annotate mask id
+        annotated = cv2.putText(
+            img=annotated,
+            text=f"{mask.id}",
+            org=(
+                int(mask.center_coord.x) - len(str(mask.id)) * 5,
+                int(mask.center_coord.y) - 8,
+            ),
+            fontFace=cv2.FONT_HERSHEY_PLAIN,
+            fontScale=1,
+            thickness=2,
+            color=mask.color,
+        )
+        annotated = cv2.circle(
+            img=annotated,
+            center=(
+                int(mask.center_coord.x),
+                int(mask.center_coord.y),
+            ),
+            radius=2,
+            color=mask.color,
+            thickness=4,
+        )
+
     ax.imshow(annotated)
 
 
