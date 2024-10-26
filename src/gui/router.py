@@ -47,6 +47,7 @@ async def upload_image(request: Request):
 
 @rt("/delete")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
@@ -65,6 +66,7 @@ async def post(request: Request):
 
 @rt("/delete_masks")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
@@ -85,6 +87,7 @@ async def post(request: Request):
 
 @rt("/plot")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
@@ -109,6 +112,7 @@ async def post(request: Request):
 
 @rt("/analyze")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)
@@ -129,6 +133,7 @@ async def post(request: Request):
 
 @rt("/export")
 async def post(request: Request):
+    sample_ids = []
     try:
         sample_ids = await utils.extract_sample_ids_from_request(request)
         utils.set_action_target(context, sample_ids)

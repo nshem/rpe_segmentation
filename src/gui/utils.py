@@ -44,6 +44,8 @@ def load_all_samples() -> list[SampleData]:
 async def extract_sample_ids_from_request(request: Request) -> list[int]:
     form = await request.form()
     sample_ids = [int(sample_id) for sample_id in form.getlist("samples")]
+    if len(sample_ids) == 0:
+        raise Exception("No samples selected")
     return sample_ids
 
 
