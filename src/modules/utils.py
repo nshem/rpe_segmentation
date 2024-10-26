@@ -59,28 +59,6 @@ def calc_centroid(coords: list[Coordinate]) -> Coordinate:
     return Coordinate([sum(x) / len(coords), sum(y) / len(coords)])
 
 
-def calculate_focal_length(
-    coords: np.ndarray,
-) -> float:  # maximum distance between two vertices
-    try:
-        # Compute the convex hull to limit the number of points to check
-        hull = ConvexHull(coords)
-        hull_points = coords[hull.vertices]
-
-        # Find the maximum distance between any two points in the convex hull
-        max_distance = 0
-        for i in range(len(hull_points)):
-            for j in range(i + 1, len(hull_points)):
-                distance = np.linalg.norm(hull_points[i] - hull_points[j])
-                if distance > max_distance:
-                    max_distance = distance
-    except Exception as e:
-        print("Error calculating focal length", e)
-        return 0
-
-    return max_distance
-
-
 def smaller_then_third_mean(area: int, areas_mean: float) -> bool:
     return area < areas_mean / 3
 
