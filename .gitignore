@@ -6,3 +6,4 @@ dist
 input/*
 .sesskey
 __pycache__
+db.db
