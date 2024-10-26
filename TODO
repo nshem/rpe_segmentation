@@ -6,8 +6,7 @@
 
 # tabular output:
 # V postgres & class models
-# - export to file
-# - cache / data loader
+# V export to file
 
 # multiple images:
 # V batch processing
@@ -20,7 +19,7 @@
 
 # backlog:
 # - model tuning
-# - docs & readme
+# V docs & readme
 # - tests
 
 # bugs:
@@ -28,3 +27,4 @@
 # V fix plotly spaces
 # - colors by area
 # V remove touching edges
+# numbers to each mask
