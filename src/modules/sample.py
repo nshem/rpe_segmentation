@@ -21,6 +21,15 @@ class Sample:
         return utils.generate_xlsx_base64(masksReports)
 
     @classmethod
+    def report_by_ids(cls, ids: list[int]) -> str:
+        masksReports = []
+        for id in ids:
+            sample = Sample(id)
+            masksReports += [MaskReport(mask).to_array() for mask in sample.masks]
+        masksReports.insert(0, MaskReport.to_headers_array())
+        return utils.generate_xlsx_base64(masksReports)
+
+    @classmethod
     def get_all(cls):
         return [Sample(id) for id in Photo.get_all_ids()]
 
