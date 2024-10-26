@@ -86,6 +86,7 @@ def ImageActions(sample: utils.SampleData):
         {
             "name": "Export",
             "hx_post": f"/export",
+            "hx_disable": not sample.has_masks,
         },
     ]
 
