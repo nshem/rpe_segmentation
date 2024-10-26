@@ -5,6 +5,21 @@ import base64
 from io import BytesIO
 
 
+class Coordinate:
+    x: float
+    y: float
+
+    def __init__(self, l: list[float]):
+        self.x = l[0]
+        self.y = l[1]
+
+    def __str__(self):
+        return f"({self.x}, {self.y})"
+
+    def __array__(self):
+        return np.array([self.x, self.y])
+
+
 def calculate_angle(coords: list[list], corner_index: int) -> float:
     num_points = len(coords)
 
@@ -25,7 +40,11 @@ def calculate_angle(coords: list[list], corner_index: int) -> float:
     return angle_degrees
 
 
-def calculate_perimiter_length(coords: list[list[float]]) -> float:
+def calculate_roundness(area: float, perimeter_length: float) -> float:
+    return (4 * np.pi * area) / (perimeter_length**2)
+
+
+def calculate_perimiter_length(coords: list[Coordinate]) -> float:
     return np.sum(
         [
             np.linalg.norm(np.array(coords[i]) - np.array(coords[i - 1]))
@@ -34,10 +53,10 @@ def calculate_perimiter_length(coords: list[list[float]]) -> float:
     )
 
 
-def calc_centroid(coords: list[list[float]]) -> list[float]:
-    x = [coord[0] for coord in coords]
-    y = [coord[1] for coord in coords]
-    return [sum(x) / len(coords), sum(y) / len(coords)]
+def calc_centroid(coords: list[Coordinate]) -> Coordinate:
+    x = [coord.x for coord in coords]
+    y = [coord.y for coord in coords]
+    return Coordinate([sum(x) / len(coords), sum(y) / len(coords)])
 
 
 def calculate_focal_length(
