@@ -7,10 +7,12 @@ opencv_python_headless==4.10.0.84
 python-dotenv==1.0.1
 segment_anything==1.0
 Shapely==2.0.5
-torch==2.4.1
-torchvision==0.19.1
+torch==2.2.2
+torchvision==0.17.2
 mpld3==0.5.10
 tornado==6.4.1
 python-fasthtml==0.6.9
 peewee==3.17.6
 scipy==1.14.1
+openpyxl‫==‬
+sqlite_minutils‫==‬4‫.‬0‫.‬3
