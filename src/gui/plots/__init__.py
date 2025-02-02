@@ -1,1 +1,1 @@
-from src.gui.plots.display import *
+from gui.plots.display import *

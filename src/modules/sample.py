@@ -1,7 +1,7 @@
-from src.modules.photo import Photo
-from src.modules.mask import Mask, MaskReport
-from src.modules.sam import generator
-from src.modules import utils
+from modules.photo import Photo
+from modules.mask import Mask, MaskReport
+from modules.sam import generator
+from modules import utils
 
 
 class Sample:

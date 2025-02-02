@@ -5,12 +5,12 @@ from segment_anything import SamAutomaticMaskGenerator
 import cv2
 from typing import Dict
 import numpy as np
-from src.modules.mask import Mask
-import src.modules.mask as mask_module
-import src.modules.utils as utils
+from modules.mask import Mask
+import modules.mask as mask_module
+import modules.utils as utils
 import datetime
 import base64
-from src.modules.storage import storage
+from modules.storage import storage
 
 
 class Photo(np.ndarray):

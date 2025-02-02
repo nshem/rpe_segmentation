@@ -4,11 +4,11 @@ import os
 import json
 import cv2
 from typing import Dict
-from src.modules.storage import storage
+from modules.storage import storage
 import numpy as np
 import random
 import shapely
-import src.modules.utils as utils
+import modules.utils as utils
 import json
 import numpy as np
 from typing import Any, Dict, List, Union

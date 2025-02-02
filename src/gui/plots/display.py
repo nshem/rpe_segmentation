@@ -1,5 +1,5 @@
-from src.gui.plots.sample import plot_sample
-from src.modules.sample import Sample
+from gui.plots.sample import plot_sample
+from modules.sample import Sample
 
 import tempfile
 import webbrowser

@@ -37,11 +37,11 @@ In the project’s root folder, open a terminal or PowerShell.
 2.	Start the Program:
 Run one of the following commands:
 ````
-python -m src.main
+python -m main
 ````
 or
 ````
-python3 -m src.main
+python3 -m main
 ````
 
 3.	Access the Interface:

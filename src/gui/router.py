@@ -3,10 +3,10 @@ import logging
 import datetime
 from fasthtml.common import *
 
-from src.modules.sample import Sample
-from src.modules.photo import Photo
-from src.gui import components, plots, utils
-from src.gui.headers import headers
+from modules.sample import Sample
+from modules.photo import Photo
+from gui import components, plots, utils
+from gui.headers import headers
 
 debug = os.getenv("DEBUG", "True") == "True"
 app, rt = fast_app(

@@ -3,7 +3,7 @@
 import fasthtml.components as lib
 import fasthtml.xtend as xlib
 import fasthtml.pico as fp
-from src.gui import utils
+from gui import utils
 
 HOME_ID = "home"
 SELECT_ROW_CHECKBOX_CLS = "select-row-checkbox"

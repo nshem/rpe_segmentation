@@ -1,6 +1,6 @@
 import base64, os, logging
-from src.modules.sample import Sample
-from src.modules.storage import storage
+from modules.sample import Sample
+from modules.storage import storage
 
 from fasthtml.common import *
 
