@@ -57,7 +57,7 @@ def DownloadScript(context: dict) -> str:
 
     context["fileToDownload"] = None
     return xlib.Script(
-        code=f"downloadFile('{fileToDownload["filename"]}', '{fileToDownload["content"]}')"
+        code="downloadFile('{0}', '{1}')".format(fileToDownload["filename"], fileToDownload["content"])
     )
 
 
