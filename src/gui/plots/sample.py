@@ -2,16 +2,18 @@ import cv2
 import matplotlib
 import math
 import tornado  # required for WebEgg
+import plotly.graph_objects as go
+import numpy as np
 
 matplotlib.use("WebAgg")
 
 import matplotlib.pyplot as plt, mpld3
 from matplotlib.axes import Axes
-from src.modules.sample import Sample
-from src.modules.mask import Mask
-from src.modules.photo import Photo
+from modules.sample import Sample
+from modules.mask import Mask
+from modules.photo import Photo
 from shapely.geometry import Polygon
-from src.gui import utils
+from gui import utils
 
 
 def display_grid_of_all_polygons(ax: Axes, masks):
@@ -83,6 +85,50 @@ def display_grid_of_all(ax: Axes, img: Photo, masks: list[Mask]):
     ax.imshow(annotated)
 
 
+def display_grid_of_all_slider(img, masks):
+    # Create a figure
+    fig = go.Figure()
+
+    # Add the original image as the background
+    fig.add_trace(go.Image(z=img))
+
+    # Create annotated images with contours and slider steps
+    steps = []
+    for i, mask in enumerate(masks):
+        # Draw the contour
+        contour = max(mask.contours, key=cv2.contourArea)
+        annotated_img = img.copy()
+        annotated_img = cv2.drawContours(
+            image=annotated_img, contours=[contour], contourIdx=0, color=mask.color, thickness=2
+        )
+
+        # Add each annotated image as a separate trace
+        fig.add_trace(go.Image(z=annotated_img, visible=False if i > 0 else True))
+
+        # Create a slider step
+        step = dict(
+            method='update',
+            args=[{'visible': [j == i for j in range(len(masks))]}],  # Toggle visibility
+            label=mask.id,
+        )
+        steps.append(step)
+
+    # Create the slider
+    sliders = [dict(
+        active=0,
+        currentvalue={"prefix": "Mask ID: "},
+        pad={"t": 50},
+        steps=steps,
+    )]
+
+    fig.update_layout(sliders=sliders,
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False)
+    )
+
+    return fig
+
+
 def corners_number_dist(ax: Axes, polygons):
     corners = [len(p.exterior.coords) - 1 for p in polygons]
     ax.hist(corners, bins=range(2, 12, 1), label="corners number")
@@ -108,6 +154,10 @@ def average_angle_dist(ax: Axes, masks: list[Mask]):
 
 def plot_sample(sample: Sample) -> str:
     polygons = [mask.polygon for mask in sample.masks]
+
+    # Generate the Plotly figure with the slider
+    plotly_fig = display_grid_of_all_slider(sample.photo, sample.masks)
+    plotly_fig.show('browser')
 
     fig, axs = plt.subplot_mosaic(
         [["A", "A", "B", "B"], ["A", "A", "B", "B"], ["C", "D", "E", "H"]],
