@@ -1,6 +1,9 @@
+import os
+import shutil
 import peewee as pw
 from dataclasses import dataclass
 import datetime
+
 
 db = pw.SqliteDatabase("db.db")
 db.connect()
@@ -32,7 +35,17 @@ class Mask(BaseModel):
     photo_id = pw.FieldAccessor(Photo, "id", "photo_id")
 
 
-# Photo.truncate_table()
-# Mask.truncate_table()
 db.create_tables([Photo, Mask])
-print(f"db: photos: {len(Photo.select())}, masks: {len(Mask.select())}")
+n_imgs, n_masks = len(Photo.select()), len(Mask.select())
+print(f"db: photos: {n_imgs}, masks: {n_masks}")
+
+if os.path.exists("db.db") and (n_imgs > 0 or n_masks > 0):
+    # Make a copy of db file in archive directory if it has data
+    os.makedirs("archive", exist_ok=True)
+    shutil.copy("db.db", os.path.join("archive", f"db_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.db"))
+
+    # Truncate table
+    Photo.truncate_table()
+    Mask.truncate_table()
+
+    print(f"Truncated db: photos: {len(Photo.select())}, masks: {len(Mask.select())}")
