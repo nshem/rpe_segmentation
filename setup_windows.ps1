@@ -1,5 +1,5 @@
 # Activate the virtual environment
-. .\venv\Scripts\Activate
+.\venv\Scripts\activate.ps1
 
 # Check if the virtual environment is activated
 if (-not $env:VIRTUAL_ENV) {
@@ -21,7 +21,6 @@ if (($major -eq 3 -and $minor -ge 10) -and ($major -eq 3 -and $minor -lt 12)) {
     Write-Output "Python version $pythonVersion is compatible."
 } else {
     Write-Output "Python version $pythonVersion is not compatible. Required: >=3.10 and <3.12"
-    exit 1
 }
 
 # Install dependencies
